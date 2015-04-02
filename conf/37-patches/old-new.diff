@@ -1,0 +1,21 @@
+diff -r b17da58bd89f linux/drivers/block/aoe/aoechr.c
+--- a/linux/drivers/block/aoe/aoechr.c	Wed May 22 15:58:12 2013 -0400
++++ b/linux/drivers/block/aoe/aoechr.c	Wed May 22 15:53:17 2013 -0400
+@@ -114,17 +114,6 @@ loop:
+ 	return 0;
+ }
+ 
+-/* added for backwards compatibility */
+-static void *kmemdup(const void *src, size_t len, gfp_t gfp)
+-{
+-	void *p;
+-
+-	p = kmalloc(len, gfp);
+-	if (p)
+-		memcpy(p, src, len);
+-	return p;
+-}
+-
+ void
+ aoechr_error(char *msg)
+ {

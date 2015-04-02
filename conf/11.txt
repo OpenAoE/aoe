@@ -1,0 +1,4 @@
+Replace kmem_cache_t with 'struct kmem_cache' for kernels supporting the latter.
+
+kmem_cache_t is deprecated in 2.6.20.
+

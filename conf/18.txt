@@ -1,0 +1,12 @@
+This change,
+
+  commit 20c2df83d25c6a95affe6157a4c9cac4cf5ffaac
+  Author: Paul Mundt <lethal@linux-sh.org>
+  Date:   Fri Jul 20 10:11:58 2007 +0900
+  
+      mm: Remove slab destructors from kmem_cache_create().
+      
+removed the penultimate parameter to kmem_cache_create, so we
+just need to drop one of the NULL function pointers in our call.
+
+It seems Mundt missed the aoe driver.  More work for me!

@@ -1,0 +1,660 @@
+-*- change-log -*-
+2013-10-14 Sam Hopkins <sah@coraid.com>
+	version-85
+
+2013-09-17 Ed Cashin <ecashin@coraid.com>
+	fix compat problem with building on Fedora 19
+
+2013-09-17 Ed Cashin <ecashin@coraid.com>
+	version-85pre1
+
+2013-09-10 Ed Cashin <ecashin@coraid.com>
+	use aoetools-36
+
+2013-08-26 Ed Cashin <ecashin@coraid.com>
+	update compatibility system
+	drop support for kernels older than 2.6.18
+
+2013-08-22 Ed Cashin <ecashin@coraid.com>
+	get page head reference for compound page tails in biovecs
+	remove warning-generating do-nothing term from example udev rules
+
+2013-07-10 Ed Cashin <ecashin@coraid.com>
+	add pkg subdirectory for distro-specific packaging files
+	version-84
+
+2013-07-02 Ed Cashin <ecashin@coraid.com>
+	merge upstream patch: reservation of MAX_HEADER bytes in skbs
+	version-84pre3
+
+2013-06-19 Ed Cashin <ecashin@coraid.com>
+	converge style (whitespace, etc.) towards kernel.org-distributed aoe
+	version-84pre2
+
+2013-06-04 Ed Cashin <ecashin@coraid.com>
+	note in README: 2.6.16 will be oldest supported kernel
+	version-84pre1
+
+2013-05-26 Ed Cashin <ecashin@coraid.com>
+	upstream change: use kmemdup when appropriate
+	move code snippets to match order in kernel.org
+
+2013-05-21 Ed Cashin <ecashin@coraid.com>
+	do not use skb members after calling dev_queue_xmit
+	update URLs in README
+
+2013-02-11 Swanand Rao <swrao@coraid.com>
+	fix bug where rmmod causes driver to panic
+	version-83pre1
+	version-83
+
+2012-12-13 Ed Cashin <ecashin@coraid.com>
+	fix hard-to-hit use-after-free bug found by Dan Carpenter
+
+2012-10-30 Swanand Rao <swrao@coraid.com>
+	add support for parallelization of I/O completion
+	version-82pre2
+	version-82
+
+2012-09-20 Ed Cashin <ecashin@coraid.com>
+	clean up kernel thread management routine
+	use aoetools-35
+
+2012-08-15 Ed Cashin <ecashin@coraid.com>
+	revert get_page use; avoid using compound page tail for zero page
+	fix aoe_ktio pausing of version 80
+	version-81pre2
+	version-81
+
+2012-08-03 Ed Cashin <ecashin@coraid.com>
+	use {get,put}_page for page _count, avoiding panic for compound pages
+	version-81pre1
+
+2012-07-17 Ed Cashin <ecashin@coraid.com>
+	version-80
+
+2012-06-29 Ed Cashin <ecashin@coraid.com>
+	use aoetools-34
+	cap I/O completion iterations before yeilding CPU in aoe_ktio
+	support 3.2.y kernel
+	version-80pre1
+
+2012-02-09 Ed Cashin <ecashin@coraid.com>
+	version-79
+
+2012-01-27 Ed Cashin <ecashin@coraid.com>
+	tell Linux virtual memory subsystem when aoe_tx writes
+	version-79pre4
+
+2011-12-30 Ed Cashin <ecashin@coraid.com>
+	use aoetools-33
+	update virtual memory settings information in HOWTO
+	version-79pre3
+
+2011-12-22 Ed Cashin <ecashin@coraid.com>
+	avoid compiler warning in openSUSE 11.4
+	update compat system: 1-param __blk_run_queue is latest
+	version-79pre2
+
+2011-12-14 Ed Cashin <ecashin@coraid.com>
+	support openSUSE 11.4 in compatibility system
+	version-79pre1
+
+2011-12-08 Ed Cashin <ecashin@coraid.com>
+	support 2.6.39 and newer kernels without big kernel lock
+	version-78pre2
+	version-78
+
+2011-07-19 Ed Cashin <ecashin@coraid.com>
+	support Scientific Linux 6.0 with check for build dependency: perl
+	version-78pre1
+
+2011-05-25 Ed Cashin <ecashin@coraid.com>
+	support 2.6.38
+	version-77
+
+2010-11-19 Ed Cashin <ecashin@coraid.com>
+	use aoetools-32
+	avoid sending more than one probe at a time on tainted path
+	get more I/O to do after stopping probes
+	do not probe unless untainted aoetgts exist
+	support 2.6.36
+	version-76
+
+2010-06-21 Ed Cashin <ecashin@coraid.com>
+	support new name for blk_queue_max_sectors in 2.6.34
+	get kmalloc and kfree delcarations from slab.h to support 2.6.34
+	version-75
+
+2010-06-09 Ed Cashin <ecashin@coraid.com>
+	avoid using system time in coarse-grained calculations
+	support include/asm symlink removal in 2.6.33
+	support SLES 10's unusual placement of skb_reset_mac_header
+
+2010-01-08 Ed Cashin <ecashin@coraid.com>
+	update copyright notices
+	version-74
+
+2009-11-23 Ed Cashin <ecashin@coraid.com>
+	impose cap on retransmit time to single remote MAC address
+	remove memory leak in grow_targets for more than 4 remote MACs
+	ignore outstanding probes in decision to call I/O request handler
+	only use one probe per tainted remote MAC address
+
+2009-09-21 Ed Cashin <ecashin@coraid.com>
+	do not run autoload.sh to configure loading of aoe on dev node access
+	use aoetools-30
+	support changes in 2.6.31
+	version-73
+
+2009-07-20 Ed Cashin <ecashin@coraid.com>
+	use ATA_CMD_ values from ata.h instead of WIN_ macros in hdreg.h
+	support older kernels where ata.h is incompatible with hdreg.h
+	allow aoedbg.c to see DEFINE_SPINLOCK in pre 2.6.11 kernels
+	version-72
+
+2009-06-29 Ed Cashin <ecashin@coraid.com>
+	do not use relay when Module.symvers is not present
+
+2009-04-09 Ed Cashin <ecashin@coraid.com>
+	avoid premature I/O failure: maintain timings on frame reassigment
+	version-71
+
+2009-02-25 Ed Cashin <ecashin@coraid.com>
+	support commas instead of spaces in aoe_iflist parameter
+	Roel Kluin: in skbfree, use skb if it's available on last iteration
+
+2009-02-06 Ed Cashin <ecashin@coraid.com>
+	fix the "kerninst" target for make, which had atrophied
+
+2009-02-03 Ed Cashin <ecashin@coraid.com>
+	fix and refine compatibility tests
+	version-70
+
+2009-01-28 Ed Cashin <ecashin@coraid.com>
+	respect aoe_deadsecs in device timeout of multi-NIC AoE devices
+	version-69
+
+2009-01-23 Ed Cashin <ecashin@coraid.com>
+	remove unused diskstats, handled by end_that_request_last
+	add compatibility with 2.6.28
+	increment page count of zero page before using for probes
+
+2009-01-08 Ed Cashin <ecashin@coraid.com>
+	do not mention retransmission of probes in /dev/etherd/err
+
+2009-01-08 Ed Cashin <ecashin@coraid.com>
+	never use known-bad remote address if good one is present
+	version-68
+
+2008-12-29 Ed Cashin <ecashin@coraid.com>
+	use "special" member of struct request; "nr_hw_segments" is gone
+	version-67
+
+2008-12-22 Ed Cashin <ecashin@coraid.com>
+	CentOS 5.2 work around for aoe_empty_page in invalid memory section
+	only run compat system when compiler, kernel, or kernel conf changes
+	support dynamic number of remote MAC addresses per AoE target
+
+2008-12-03 Ed Cashin <ecashin@coraid.com>
+	add "report" make target for reporting trouble building driver
+	omit "function" keyword in compat.sh for POSIX compatibility
+	compatibility: update ZERO_PAGE test for CentOS 5.2 x86_64 phys_page
+	use aoetools-29
+	version-66
+
+2008-10-31 Ed Cashin <ecashin@coraid.com>
+	use ATA reads instead of config responses to redeem remote MAC
+	eliminate race condition between discovery and flushing
+	adjust retransmit timeout to allow for legitimate delay
+	version-65
+
+2008-10-17 Ed Cashin <ecashin@coraid.com>
+	improve device_create compatibility test for openvz
+	use microsecond timings for round trips when possible
+	account for retransmit deferral time in f->waited
+	clear out frames in rexmitq when taking device down
+	handle frames in the rexmitq when unusing an aoetgt
+	add framework for using relay for tracing
+
+2008-09-25 Sam Hopkins <sah@coraid.com>
+	fix deferred retransmits
+	separate mean deviation and average RTT scaling settings
+	grow window in congestion avoidance only on full window
+
+2008-09-25 Ed Cashin <ecashin@coraid.com>
+	fix realrealclean make target for multi-state conf system
+	defer retransmits until congestion window has room
+
+2008-08-28 Ed Cashin <ecashin@coraid.com>
+	maintain skb->truesize (resolves reported SKB_BUG messages)
+
+2008-08-19 Ed Cashin <ecashin@coraid.com>
+	generalize compat system to handle more than two states
+	2.6.26 compat: use device_create_drvdata and device_destroy
+	2.6.26 compat: use dev_net instead of accessing net_nd
+	don't bother negating the rtt for unexpected responses
+	version-64
+
+2008-06-24 Ed Cashin <ecashin@coraid.com>
+	use normal slow start and congestion avoidance instead of mintimer
+	use aoetools-27
+	version-63
+
+2008-06-03 "Ed L. Cashin" <ecashin@coraid.com>
+	do not overwrite an existing 60-aoe.rules udev configuration
+
+2008-06-02 "Ed L. Cashin" <ecashin@coraid.com>
+	support insertion of conf test via conf/bump.sh
+	support RHEL 5.2 kernel 2.6.18-92.el5-i686 by splitting compat test
+	export ATA device identify response based on patch from sah
+	version-62
+
+2008-05-28 "Ed L. Cashin" <ecashin@coraid.com>
+	support gcc-3.4.6 in conf test for core devices
+
+2008-04-22 "Ed L. Cashin" <ecashin@coraid.com>
+	use blk_start_queueing when it is available
+	use aoetools-25, which includes sos-linux
+	version-61
+
+2008-04-22 "Ed L. Cashin" <ecashin@coraid.com>
+	ignore AoE commands that are vendor extensions
+	distinguish between mem alloc failure and shortage of target slots
+	support sysfs changes in 2.6.25, where core devices are used
+	use aoetools-25, which includes coraid-update
+	use new block request completion style in 2.6.25 (blk_end_request)
+	use getgeo block device operation when available (so blktool works)
+	update compatibility tests and add new ones
+	version-60
+
+2008-03-14 "Ed L. Cashin" <ecashin@coraid.com>
+	eliminate "aoe: unknown ioctl 8837" noise (from SG_IO)
+
+2008-01-28 "Ed L. Cashin" <ecashin@coraid.com>
+	add configuration tests for 2.6.24 compatibility
+	version-59
+
+2008-01-21 "Ed L. Cashin" <ecashin@coraid.com>
+	add 00-INDEX for Documentation/aoe (upstream change)
+	eliminate compiler warning in aoedev.c
+	version-58
+
+2008-01-17 "Ed L. Cashin" <ecashin@coraid.com>
+	correct typo in unrecognized AoE command warning
+	fix aoe-flush on one device by using size of user string
+
+2008-01-09 Sam Hopkins <sah@coraid.com>
+	export payload size for I/O packets
+	version-57
+
+2008-01-09 "Ed L. Cashin" <ecashin@coraid.com>
+ 	remove stacked ifs, checking disassembled compiled code
+	use aoetools-23 for handling payload size info
+
+2007-12-26 "Ed L. Cashin" <ecashin@coraid.com>
+	statically initialize devlist_lock (upstream change)
+
+2007-12-10 Sam Hopkins <sah@coraid.com>
+	add module parameter aoe_maxsectors for GPFS support
+	version-56
+
+2007-12-10 "Ed L. Cashin" <ecashin@coraid.com>
+	add support for forgetting, "flushing", a specific device
+	support gcc-3.4.4 in compatibility tests
+	use aoetools-22
+	don't use kmem_cache_create destructor parm in code (conf/16)
+
+2007-11-12 "Ed L. Cashin" <ecashin@coraid.com>
+	do not attempt to use NULL block queue in rexmit_timer
+	do not attempt to use NULL block queue in aoedev_downdev
+	update cap on outstanding packets on config responses
+	stop using deprecated request_queue_t typedef
+	version-55
+
+2007-11-06 "Ed L. Cashin" <ecashin@coraid.com>
+	support gcc-4.1 in compat test 11
+	add compat test 16 for 2.6.23, which has no slab destructors
+	use aoetools-20
+	version-54
+
+2007-10-19 "Ed L. Cashin" <ecashin@coraid.com>
+	warn when dropped transmit indicates tx_queue_len is too short
+	use aoetools-19
+	version-53
+
+2007-08-28 "Ed L. Cashin" <ecashin@coraid.com>
+	recognize new kernel in conf/11 on 2.6.23-rc3
+
+2007-08-15 "Ed L. Cashin" <ecashin@coraid.com>
+	include moduleparam.h in aoedev.c for 2.6.5
+	version-52
+
+2007-08-15 Sam Hopkins <sah@coraid.com>
+	call aoe_freetframe with d->lock held
+	add "realrealclean" Makefile target to revert conf patches
+	cleanup
+
+2007-08-07 "Ed L. Cashin" <ecashin@coraid.com>
+	add backwards compatibility for older kernels
+	use aoetools-18
+	support 2.6.10 and earlier, which lacked DEFINE_SPINLOCK
+	version-51
+
+2007-08-07 Sam Hopkins <sah@coraid.com>
+	support networking changes in 2.6.22
+
+2007-07-25 "Ed L. Cashin" <ecashin@coraid.com>
+	support dynamic minor device numbers for greater flexibility
+	update conf/8 for compatibility with Fedora Core 2
+	memset all of nds to zero in aoedisk_show_netif
+	update documentation
+	version-50
+
+2007-07-18 "Ed L. Cashin" <ecashin@coraid.com>
+	howto update: mention recent success reports with lvm striping
+	version-49
+
+2007-07-11 Sam Hopkins <sah@coraid.com>
+	support AoE responses coming from mac addr we didn't send to
+
+2007-07-10 "Ed L. Cashin" <ecashin@coraid.com>
+	complain and don't use AoE slot greater than supported
+	check return value from skb_linearize
+	update, fix, and refresh conf patches
+	Makefile removes object files for different target kernel
+	remove unused symbols from aoe.h
+
+2007-06-21 Sam Hopkins <sah@coraid.com>
+	handle payloads larger than 4KiB
+	handle fragmented packets on receive without extra copy
+	handle I/O requests instead of implementing a make_request
+	use a single max byte count for all network paths to a dev
+
+2007-06-01 "Ed L. Cashin" <ecashin@coraid.com>
+	use aoetools-16, which works around a math bug in dash
+	version-48
+
+2007-04-11 "Ed L. Cashin" <ecashin@coraid.com>
+	HOWTO updates
+	use aoetools-15
+	use get_unaligned, which wouldn't be needed if we just copied bytes
+	eliminate unlikely race on locks in char dev setup
+	add aoe_maxout module parameter
+ 	update conf/2.diff
+	version-47
+
+2007-03-23 "Ed L. Cashin" <ecashin@coraid.com>
+	udev example rules mention specific compatibility issues
+
+2007-02-08 Sam Hopkins <sah@coraid.com>
+	don't allow worker threads to race on gd alloc
+	version-46
+
+2007-02-07 "Ed L. Cashin" <ecashin@coraid.com>
+	remove sorting in addtgt and avoid leaking last tgt
+	increase NSKBPOOLMAX because broadcom NICs hit 64 max
+	improve conf/11
+	add conf/12 test for sysfs groups to avoid warn_unused_result
+	clean up .o and .ko files in conf during prep
+	version-45
+
+2007-02-06 Sam Hopkins <sah@coraid.com>
+	bugfix: "unexpected null rf!"
+	bugfix: duplicate targets for device
+	use aoetools-14
+	stop using deprecated kmem_cache_t type
+	change to new init_work interface
+	add ability to flush all unused devices
+	add conf/10 test for workqueue change in 2.6.20 kernel
+	add conf/11 test for kmem_cache_t deprecation
+
+2007-01-23 Sam Hopkins <sah@coraid.com>
+	use dynamic pool of skbuffs to keep up with fast targets
+	true round-robin load balancing
+	allocate skbuffs on demand
+	version-44
+
+2007-01-17 "Ed L. Cashin" <ecashin@coraid.com>
+	add conf/9 test for old kernels with "count" page struct field
+	unuse the "ed" command in Makefile (gentoo user had trouble)
+
+2007-01-05 "Ed L. Cashin" <ecashin@coraid.com>
+	extensive update of first sections of EtherDrive HOWTO
+	workaround for XFS: increment bio page refs during use
+	version-43
+
+2006-12-21 Sam Hopkins <sah@coraid.com>
+	remove conf logs in realclean target
+	remove conf/Makefile and add it to realclean target
+	allow installation of devices in /dev for expert users
+	use aoetools-13
+	version-42
+
+2006-12-18 "Ed L. Cashin" <ecashin@coraid.com>
+	for cards without scatter gather set up header length correctly
+	version-41
+
+2006-11-06 "Ed L. Cashin" <ecashin@coraid.com>
+	update HOWTO coverage of jumbo frames
+	set LC_ALL=C in conf/compat.sh for non-English platforms
+	HOWTO: explicitly say that udev works only when aoe is loaded
+	version-40
+
+2006-10-31 Sam Hopkins <sah@coraid.com>
+ 	bugfix: retransmission of ata ident clears ata scnt field
+ 	add support for flushing downed devices out of the device list
+	use aoetools-12
+ 	version-39
+
+2006-10-27 "Ed L. Cashin" <ecashin@coraid.com>
+	add multiple network path FAQ
+
+2006-10-24 Peter Horton <phorton@bitbox.co.uk>
+	avoid unaligned accesses for ARM
+
+2006-10-03 "Ed L. Cashin" <ecashin@coraid.com>
+	add large fs intro FAQ to HOWTO
+	add sah's jumbo info to HOWTO
+
+2006-09-26 Sam Hopkins <sah@coraid.com>
+	bugfix: unlock in error case with too many paths to AoE device
+	increase number of supported paths to AoE device
+	version-38
+
+2006-09-21 "Ed L. Cashin" <ecashin@coraid.com>
+	add kerninst target to makefile for putting driver in kernel tree
+	version-37
+
+2006-09-12 "Adam J. Richter" <adam@yggdrasil.com>
+	eliminate goto and improve readability
+
+2006-09-12 Anthony Wright <anthony@communitymesh.com>
+	update syntax in udev rules
+
+2006-09-07 "Ed L. Cashin" <ecashin@coraid.com>
+	compat: too few arguments error doesn't start with "error:"
+	version-36
+
+2006-09-07 Anthony Wright <anthony@communitymesh.com>
+	use POSIX shell math instead of bc and dc
+	use default rules.d location like udev does in udev-install.sh
+
+2006-09-07 "Ed L. Cashin" <ecashin@coraid.com>
+	ignore failure of autoload.sh script; it already prints a message
+	update compatibility for kernels without msleep_interruptible
+
+2006-09-05 "Ed L. Cashin" <ecashin@coraid.com>
+	add #include <linux/moduleparam.h> to aoecmd.c for SuSE 9.1
+	compatibility system overhaul
+	add compatibility for kernels without msleep_interruptible
+	version-35
+
+2006-08-30 "Ed L. Cashin" <ecashin@coraid.com>
+	have mac_addr return unsigned long long to avoid casts in printks
+	version-34
+
+2006-08-30 Sam Hopkins <sah@coraid.com>
+	support recent RHEL 4 that add some new class calls and retain old ones
+
+2006-08-23 "Ed L. Cashin" <ecashin@coraid.com>
+	update test 7 for new aoenet.c
+	version-33
+
+2006-08-23 Sam Hopkins <sah@coraid.com>
+	add window management for outstanding message count
+	add multipath capability for failover and load balancing
+	add sysfs debug file for ease of monitoring device state
+	remove [die]printk macros for MBAs who eschew their usage
+
+2006-08-04 "Ed L. Cashin" <ecashin@coraid.com>
+	howto: make the need for ifconfig up more prominent
+	make skb_linearize call in aoenet.c be like kernel.org (works same)
+
+2006-07-26 "Ed L. Cashin" <ecashin@coraid.com>
+	give "closewait" its own FAQ and mention aoe-revalidate
+ 	bugfix: use bi_idx to find first biovec in bio
+ 	warn on zero-length biovecs
+ 	aoe6-32
+
+2006-07-21 "Ed L. Cashin" <ecashin@coraid.com>
+	add compatibility with new one-parameter skb_linearize in kernel
+	aoe6-31
+
+2006-06-02 "Ed L. Cashin" <ecashin@coraid.com>
+	three minute aoe_deadsecs avoids unlikely race with config query broadcast
+	use aoetools-10
+	aoe6-30
+
+2006-05-09 "Ed L. Cashin" <ecashin@coraid.com>
+	make 60 seconds the default value for aoe_deadsecs, the AoE dev timeout
+	document aoe_deadsecs parameter and add cross ref to README
+	aoe6-29
+
+2006-05-08 "Ed L. Cashin" <ecashin@coraid.com>
+	don't log each occasion when we're waiting for the net layer xmit
+	aoe6-28
+
+2006-05-02 Sam Hopkins <sah@coraid.com>
+	don't use skbs before the network layer is done with the clone
+	aoe6-27
+
+2006-04-04 "Ed L. Cashin" <ecashin@coraid.com>
+	on reads don't set skb->len and skb->data_len for write
+	reset skb shared in non-free frames info when taking aoedev down
+	conf: support RHEL gcc that doesn't say "error:" in error messages
+	support aoe_deadsecs module parameter
+	release aoe6-26
+
+2006-03-23 Sam Hopkins <sah@coraid.com>
+	fix zero-copy write feature
+	release aoe6-25
+
+2006-03-21 "Ed L. Cashin" <ecashin@coraid.com>
+	document the use of jumbo frames in the HOWTO
+
+2006-03-17 Sammy Hopkins <sah@coraid.com>
+	avoid extra data copy on writes
+	support jumbo frames
+	clean up printks and whitespace
+	reduce retransmits by using a dynamic minimum packet timeout
+	release aoe6-24
+
+2006-02-09 "Ed L. Cashin" <ecashin@coraid.com>
+	code cleanup
+	add TODO file
+	add install_nodev makefile target
+	documentation updates
+	remove unecessary "isbusy" message
+	release aoe6-23
+
+2006-02-03 Sam Hopkins <sah@coraid.com>
+	allow aoe driver to coexist with kvblade
+	do not repeat failed ATA device identify requests
+	release aoe6-22
+
+2006-01-19 "Ed L. Cashin" <ecashin@coraid.com>
+	use new mutex type when updating block device size
+	keep the retransmit timer running for down devices
+	add compatibility with kernels 2.6.16 and up (i_mutex)
+	release aoe6-21
+
+2006-01-13 Sam Hopkins <sah@coraid.com>
+	avoid race that can add d->timer more than once
+	release aoe6-20
+
+2006-01-04 "Ed L. Cashin" <ecashin@coraid.com>
+	add 2.6.15 compatibility
+	systematize the backwards-compatibility support
+	update compatibility info in module description
+	release aoe6-19
+
+2005-12-28 "Ed L. Cashin" <ecashin@coraid.com>
+	document NFS fsid option in FAQ
+	do an AoE query config for a device that goes from open to closed
+	don't access user page without copy_from_user in revalidate
+	refresh class_simple patch in conf
+	release aoe6-18
+
+2005-12-19 Sam Hopkins <sah@coraid.com>
+	use latest NIC for an AoE device on packet retransmits
+	release aoe6-17
+
+2005-12-06 "Ed L. Cashin" <ecashin@coraid.com>
+	fix recent revalidate changes: don't sleep with interrupts off
+	release aoe6-16
+
+2005-12-06 "Ed L. Cashin" <ecashin@coraid.com>
+	update HOWTO
+	add aoe-revalidate support
+	double number of outstanding AoE packets for performance
+	release aoe6-15
+
+2005-09-26 16:01:03 EDT "Ed L. Cashin" <ecashin@coraid.com>
+	update driver naming scheme: aoe-2.6 becomes aoe6
+	zero packet data on allocation
+	use get_unaligned for accessing ATA identify response buffer
+	make class_simple compatibility test work on Suse 9.3 Pro
+	release aoe6-14
+
+2005-09-22 18:04:30 GMT "Ed L. Cashin" <ecashin@coraid.com>
+	add compatibility with kernels that don't have class_simple
+	include moduleparam.h for compatibility with 2.6.2
+	bundle aoetools-7
+	minimum packet size is now ETH_ZLEN (fixes problems on e1000)
+	release 2.6-13
+
+2005-08-22 14:29:25 GMT "Ed L. Cashin" <ecashin@coraid.com>
+	don't ask Makefile in kernel sources where to install aoe.ko
+	bundle aoetools-6
+	add a /sys/modules/aoe/parameters/version sysfs file
+	release 2.6-12
+
+2005-07-14 16:02:28 GMT "Ed L. Cashin" <ecashin@coraid.com>
+	bundle aoetools-5 with standalone driver
+	fix minor module declaration typos
+	change "fwver" sysfs file to "firmware-version"
+	documentation improvements
+	support 16 slot addresses per shelf address
+	release 2.6-11
+
+2005-04-08 10:06:19 EDT "Ed L. Cashin" <ecashin@coraid.com>
+	add sysfs disk attribute showing device firmware version
+	release 2.6-9
+	bugfix: record new MAC address on config response
+	don't remove the status.sh file that is no longer generated
+	release 2.6-10
+
+2005-03-23 22:59:03 GMT	"Ed L. Cashin" <ecashin@coraid.com>
+	update the documentation to cover aoetools
+	don't install programs that are part of the aoetools
+	fix aoe-interfaces: don't concat multiple args together
+	Alexander Nyberg <alexn@dsv.su.se>: avoid warnings on x86_64
+	make aoe-stat work for built-in as well as module
+	add mdadm raid 10 example to HOWTO
+	skip initial whitespace in interfaces list
+	add and document module param and boot option for aoe interfaces
+	document aoe_iflist driver option
+	recommend discovery after setting aoe interfaces list
+	release 2.6-8
+

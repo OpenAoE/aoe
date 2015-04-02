@@ -1,0 +1,35 @@
+diff --git a/linux/drivers/block/aoe/aoeblk.c b/linux/drivers/block/aoe/aoeblk.c
+index 9e196f7..18146b8 100644
+--- a/linux/drivers/block/aoe/aoeblk.c
++++ b/linux/drivers/block/aoe/aoeblk.c
+@@ -199,12 +199,11 @@ aoedisk_rm_sysfs(struct aoedev *d)
+ }
+ 
+ static int
+-aoeblk_open(struct inode *inode, struct file *filp)
++aoeblk_open(struct block_device *bdev, fmode_t mode)
+ {
+-	struct aoedev *d;
++	struct aoedev *d = bdev->bd_disk->private_data;
+ 	ulong flags;
+ 
+-	d = inode->i_bdev->bd_disk->private_data;
+ 	if (!virt_addr_valid(d)) {
+ 		printk(KERN_CRIT
+ 			"aoe: invalid device pointer in %s\n",
+@@ -226,13 +225,11 @@ aoeblk_open(struct inode *inode, struct file *filp)
+ }
+ 
+ static int
+-aoeblk_release(struct inode *inode, struct file *filp)
++aoeblk_release(struct gendisk *disk, fmode_t mode)
+ {
+-	struct aoedev *d;
++	struct aoedev *d = disk->private_data;
+ 	ulong flags;
+ 
+-	d = inode->i_bdev->bd_disk->private_data;
+-
+ 	spin_lock_irqsave(&d->lock, flags);
+ 
+ 	if (--d->nopen == 0) {

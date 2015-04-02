@@ -1,0 +1,8 @@
+The 2.6.25 kernel does not make end_that_request_{first,last}
+available to drivers.  See,
+
+  commit 336cdb4003200a90f4fc52a4e9ccc2baa570fffb
+
+  http://lwn.net/Articles/266914/
+
+... for details.  We have to use __blk_end_request instead.

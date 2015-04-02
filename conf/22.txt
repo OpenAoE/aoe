@@ -1,0 +1,20 @@
+When they added getgeo to the block device methods, we kept using
+ioctl-based get geometry in the standalone aoe driver, since it has
+greater backwards compatibility.  Then on some kernels, the old
+ioctl-based method was no longer working, e.g., when blktool tries to
+get info about the device.
+
+So now we use the getgeo block device method when it is available.
+
+commit a885c8c4316e1c1d2d2c8755da3f3d14f852528d
+Author: Christoph Hellwig <hch@lst.de>
+Date:   Sun Jan 8 01:02:50 2006 -0800
+
+    [PATCH] Add block_device_operations.getgeo block device method
+    
+    HDIO_GETGEO is implemented in most block drivers, and all of them have to
+    duplicate the code to copy the structure to userspace, as well as getting
+    the start sector.  This patch moves that to common code [1] and adds a
+    ->getgeo method to fill out the raw kernel hd_geometry structure.  For many
+    drivers this means ->ioctl can go away now.
+

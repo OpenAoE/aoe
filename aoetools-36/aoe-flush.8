@@ -1,0 +1,50 @@
+.TH aoe-flush 8
+.SH NAME
+aoe-flush \- flush the down devices out of the aoe driver
+.SH SYNOPSIS
+.nf
+.B aoe-flush [-a]
+.B aoe-flush dev1 [dev2 ...]
+.fi
+.SH DESCRIPTION
+The
+.I aoe-flush
+command tells the aoe driver to remove devices from the system and
+forget about them.  Normally the aoe driver will remember all devices it has
+seen until the module is unloaded.  By default, 
+.I aoe-flush
+will only flush
+downed devices.  With the \fB-a\fP flag all devices are candidates for removal.
+.PP
+.I aoe-flush
+will not remove devices that are in use.  This includes devices in the
+closewait state or those in the process of being installed.
+.PP
+By specifying a series of specific aoe devices, e.g., \fBe7.0 e3.2\fP,
+it is possible to ask the aoe driver to forget these devices.  This
+feature may be convenient after a temporary AoE target is no longer
+being used.
+.SH OPTIONS
+.TP
+\fB-a\fP
+The \fB-a\fP option tells the aoe driver to forget all unused devices.
+.SH EXAMPLE
+.EX
+.nf
+nai# aoe-stat | grep e12.0
+     e12.0         0.000GB   eth1 down          
+nai# aoe-flush
+nai# aoe-stat | grep e12.0
+.fi
+.EE
+.SH BUGS
+Flushed devices may reappear when they are discovered by the periodic discovery
+beacon.
+.I aoe-discover
+may be used to force this behaviour.
+.SH "SEE ALSO"
+.IR aoe-stat (8),
+.IR aoe-discover (8),
+.IR aoetools (8).
+.SH AUTHOR
+Sam Hopkins (sah@coraid.com)

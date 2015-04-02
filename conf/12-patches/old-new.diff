@@ -1,0 +1,43 @@
+diff -upr a/linux/drivers/block/aoe/aoeblk.c b/linux/drivers/block/aoe/aoeblk.c
+--- a/linux/drivers/block/aoe/aoeblk.c	2007-02-07 18:20:21.000000000 -0500
++++ b/linux/drivers/block/aoe/aoeblk.c	2007-02-07 18:26:37.000000000 -0500
+@@ -168,23 +168,28 @@ static struct disk_attribute disk_attr_d
+ 	.show = aoedisk_show_debug
+ };
+ 
+-static void
++static struct attribute *aoe_attrs[] = {
++	&disk_attr_state.attr,
++	&disk_attr_mac.attr,
++	&disk_attr_netif.attr,
++	&disk_attr_fwver.attr,
++	&disk_attr_debug.attr,
++	NULL
++};
++
++static const struct attribute_group attr_group = {
++	.attrs = aoe_attrs,
++};
++
++static int
+ aoedisk_add_sysfs(struct aoedev *d)
+ {
+-	sysfs_create_file(&d->gd->kobj, &disk_attr_state.attr);
+-	sysfs_create_file(&d->gd->kobj, &disk_attr_mac.attr);
+-	sysfs_create_file(&d->gd->kobj, &disk_attr_netif.attr);
+-	sysfs_create_file(&d->gd->kobj, &disk_attr_fwver.attr);
+-	sysfs_create_file(&d->gd->kobj, &disk_attr_debug.attr);
++	return sysfs_create_group(&d->gd->kobj, &attr_group);
+ }
+ void
+ aoedisk_rm_sysfs(struct aoedev *d)
+ {
+-	sysfs_remove_link(&d->gd->kobj, "state");
+-	sysfs_remove_link(&d->gd->kobj, "mac");
+-	sysfs_remove_link(&d->gd->kobj, "netif");
+-	sysfs_remove_link(&d->gd->kobj, "firmware-version");
+-	sysfs_remove_link(&d->gd->kobj, disk_attr_debug.attr.name);
++	sysfs_remove_group(&d->gd->kobj, &attr_group);
+ }
+ 
+ static int

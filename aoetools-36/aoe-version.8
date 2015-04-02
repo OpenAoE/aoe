@@ -1,0 +1,29 @@
+.TH aoe-version 8
+.SH NAME
+aoe-version \- print AoE-related software version information
+.SH SYNOPSIS
+.nf
+.B aoe-version
+.fi
+.SH DESCRIPTION
+The
+.I aoe-version
+script collects information on running and installed ATA over Ethernet
+software, displaying a summary.
+.SH EXAMPLE
+.IP
+.EX
+.nf
+ellijay:~# aoe-version  
+              aoetools: 17
+  installed aoe driver: 50
+    running aoe driver: 50
+.fi
+.EE
+.SH "SEE ALSO"
+.IR aoe-discover (8),
+.IR aoe-interfaces (8),
+.IR aoetools (8),
+.IR aoe-stat (8).
+.SH AUTHOR
+Ed L. Cashin (ecashin@coraid.com)

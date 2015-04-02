@@ -1,0 +1,18 @@
+We are using compound_trans_head to find the page that holds the reference
+count for a given page associated with a biovec.
+
+The function first appears in a 2011 commit that is contained in the
+v2.6.38-rc1~99 but has been backported to the RHEL 6 2.6.32 kernel.
+
+  commit 22e5c47ee238abe636655c3862ed28d6eb084ad4
+  Author: Andrea Arcangeli <aarcange@redhat.com>
+  Date:   Thu Jan 13 15:47:20 2011 -0800
+  
+      thp: add compound_trans_head() helper
+      
+      Cleanup some code with common compound_trans_head helper.
+      
+Before we were using this, older kernels didn't mind that we were
+temporarily incrementing the reference count of tail pages, so for
+compatibility we use a stub that simply returns whatever page it is
+sent.

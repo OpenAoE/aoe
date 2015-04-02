@@ -1,0 +1,21 @@
+diff --git a/linux/drivers/block/aoe/aoeblk.c b/linux/drivers/block/aoe/aoeblk.c
+index a57316a..677584e 100644
+--- a/linux/drivers/block/aoe/aoeblk.c
++++ b/linux/drivers/block/aoe/aoeblk.c
+@@ -278,14 +278,14 @@ aoeblk_getgeo(struct block_device *bdev, struct hd_geometry *geo)
+ }
+ 
+ static int
+-aoeblk_ioctl(struct inode *inode, struct file *filp, uint cmd, ulong arg)
++aoeblk_ioctl(struct block_device *bdev, fmode_t mode, uint cmd, ulong arg)
+ {
+ 	struct aoedev *d;
+ 
+ 	if (!arg)
+ 		return -EINVAL;
+ 
+-	d = inode->i_bdev->bd_disk->private_data;
++	d = bdev->bd_disk->private_data;
+ 	if ((d->flags & DEVFL_UP) == 0) {
+ 		printk(KERN_ERR "aoe: disk not up\n");
+ 		return -ENODEV;

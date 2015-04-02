@@ -1,0 +1,47 @@
+diff --git a/linux/drivers/block/aoe/aoeblk.c b/linux/drivers/block/aoe/aoeblk.c
+index 7323084..b7a6b01 100644
+--- a/linux/drivers/block/aoe/aoeblk.c
++++ b/linux/drivers/block/aoe/aoeblk.c
+@@ -252,8 +252,8 @@ aoeblk_request(struct request_queue *q)
+ 	if ((d->flags & DEVFL_UP) == 0) {
+ 		printk(KERN_INFO "aoe: device %ld.%d is not up\n",
+ 			d->aoemajor, d->aoeminor);
+-		while ((rq=elv_next_request(q))) {
+-			blkdev_dequeue_request(rq);
++		while ((rq = blk_peek_request(q))) {
++			blk_start_request(rq);
+ 			aoe_end_request(d, rq, 1);
+ 		}
+ 		return;
+diff --git a/linux/drivers/block/aoe/aoecmd.c b/linux/drivers/block/aoe/aoecmd.c
+index d188b5b..4ec5536 100644
+--- a/linux/drivers/block/aoe/aoecmd.c
++++ b/linux/drivers/block/aoe/aoecmd.c
+@@ -909,10 +909,10 @@ nextbuf(struct aoedev *d)
+ 		return d->ip.buf;
+ 	rq = d->ip.rq;
+ 	if (rq == NULL) {
+-		rq = elv_next_request(q);
++		rq = blk_peek_request(q);
+ 		if (rq == NULL)
+ 			return NULL;
+-		blkdev_dequeue_request(rq);
++		blk_start_request(rq);
+ 		d->ip.rq = rq;
+ 		d->ip.nxbio = rq->bio;
+ 		rq->special = (void *) rqbiocnt(rq);
+diff --git a/linux/drivers/block/aoe/aoedev.c b/linux/drivers/block/aoe/aoedev.c
+index 8466628..d02ecb7 100644
+--- a/linux/drivers/block/aoe/aoedev.c
++++ b/linux/drivers/block/aoe/aoedev.c
+@@ -227,8 +227,8 @@ aoedev_downdev(struct aoedev *d)
+ 
+ 	/* fast fail all pending I/O */
+ 	if (d->blkq) {
+-		while ((rq = elv_next_request(d->blkq))) {
+-			blkdev_dequeue_request(rq);
++		while ((rq = blk_peek_request(d->blkq))) {
++			blk_start_request(rq);
+ 			aoe_end_request(d, rq, 1);
+ 		}
+ 	}

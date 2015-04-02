@@ -1,0 +1,7 @@
+For 2.6.15, Jens Axboe changed the way disk stats are kept.
+
+Since we switched over to handling I/O requests, though, we don't have
+to update the disk stats, because that's done in the block layer in
+end_that_request_last.
+
+So this conf test is becoming a noop.

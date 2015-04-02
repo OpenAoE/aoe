@@ -1,0 +1,10 @@
+  A bugfix in the 2.6.11 kernel moved a struct from a hidden
+  definition in a .c file to a public header file.
+
+  To support 2.6.11 and later kernels as well as earlier kernels, we
+  need to be able to either define struct disk_attribute or not,
+  depending on its presence in the kernel we're building against.  We
+  could try grep and hope nobody moves disk_attribute to a different
+  header, but the most reliable way to tell is to simply compile
+  something and test for failure.
+

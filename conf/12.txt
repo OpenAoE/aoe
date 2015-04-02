@@ -1,0 +1,19 @@
+As of 2.6.20, the sysfs_create_file function has a return value and
+complains if we ignore the results.  Jeff Garzik sent a patch that
+attends to the results:
+
+  Message-ID: <20061004135819.GA29526@havoc.gtf.org>
+
+... but Greg KH had a nicer patch that used the new "group" feature.
+
+  Message-Id: <20061003183705.27E1091A6EB@imap.suse.de>
+
+Greg's patch had a bug that was subsequently fixed by Dennis Stosberg
+in
+
+  Message-ID: <20061113081520.G77d5ed8a@leonov.stosberg.net>
+
+... where he added the NULL that was missing from Greg's array.
+
+For conf/12, we use the groups feature if it is present in the kernel
+for which we're building the aoe driver.

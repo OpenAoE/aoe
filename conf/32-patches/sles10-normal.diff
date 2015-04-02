@@ -1,0 +1,15 @@
+diff -upr sles10/linux/drivers/block/aoe/aoecmd.c normal/linux/drivers/block/aoe/aoecmd.c
+--- sles10/linux/drivers/block/aoe/aoecmd.c	2010-02-19 20:01:14.264154534 -0500
++++ normal/linux/drivers/block/aoe/aoecmd.c	2010-02-19 20:00:24.327637132 -0500
+@@ -58,6 +58,11 @@ skb_reset_network_header(struct sk_buff 
+ {
+ 	skb->nh.raw = skb->data;
+ }
++static void
++skb_reset_mac_header(struct sk_buff *skb)
++{
++	skb->mac.raw = skb->data;
++}
+ static void *
+ skb_mac_header(struct sk_buff *skb)
+ {

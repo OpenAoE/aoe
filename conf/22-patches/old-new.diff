@@ -1,0 +1,46 @@
+diff -upr old/linux/drivers/block/aoe/aoeblk.c new/linux/drivers/block/aoe/aoeblk.c
+--- old/linux/drivers/block/aoe/aoeblk.c	2009-01-22 12:11:17.000000000 -0500
++++ new/linux/drivers/block/aoe/aoeblk.c	2009-01-21 17:13:12.000000000 -0500
+@@ -262,6 +262,22 @@ aoeblk_request(struct request_queue *q)
+ }
+ 
+ static int
++aoeblk_getgeo(struct block_device *bdev, struct hd_geometry *geo)
++{
++	struct aoedev *d = bdev->bd_disk->private_data;
++
++	if ((d->flags & DEVFL_UP) == 0) {
++		printk(KERN_ERR "aoe: disk not up\n");
++		return -ENODEV;
++	}
++
++	geo->cylinders = d->geo.cylinders;
++	geo->heads = d->geo.heads;
++	geo->sectors = d->geo.sectors;
++	return 0;
++}
++
++static int
+ aoeblk_ioctl(struct block_device *bdev, fmode_t mode, uint cmd, ulong arg)
+ {
+ 	struct aoedev *d;
+@@ -280,11 +296,6 @@ aoeblk_ioctl(struct block_device *bdev, 
+ 				sizeof d->ident))
+ 			return 0;
+ 		return -EFAULT;
+-	} else if (cmd == HDIO_GETGEO) {
+-		d->geo.start = get_start_sect(inode->i_bdev);
+-		if (!copy_to_user((void __user *) arg, &d->geo, sizeof d->geo))
+-			return 0;
+-		return -EFAULT;
+ 	}
+ 
+ 	/* udev calls scsi_id, which uses SG_IO, resulting in noise */
+@@ -298,6 +309,7 @@ static struct block_device_operations ao
+ 	.open = aoeblk_open,
+ 	.release = aoeblk_release,
+ 	.ioctl = aoeblk_ioctl,
++	.getgeo = aoeblk_getgeo,
+ 	.owner = THIS_MODULE,
+ };
+ 

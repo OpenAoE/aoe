@@ -1,0 +1,39 @@
+--- a/linux/drivers/block/aoe/aoechr.c.old	2013-05-30 10:55:29.237409949 -0400
++++ a/linux/drivers/block/aoe/aoechr.c	2013-05-30 10:54:46.538481086 -0400
+@@ -9,7 +9,7 @@
+ #include <linux/init.h>
+ #include <linux/delay.h>
+ #include <linux/slab.h>
+-#include <linux/smp_lock.h>
++#include <linux/mutex.h>
+ #include <linux/export.h>
+ #include "aoe.h"
+ 
+@@ -54,6 +54,7 @@ static struct aoe_chardev chardevs[] = {
+ 	{ MINOR_REVALIDATE, "revalidate" },
+ 	{ MINOR_FLUSH, "flush" },
+ };
++static DEFINE_MUTEX(aoechr_mutex);
+ 
+ static int
+ discover(void)
+@@ -182,16 +183,16 @@ aoechr_open(struct inode *inode, struct 
+ {
+ 	int n, i;
+ 
+-	lock_kernel();
++	mutex_lock(&aoechr_mutex);
+ 	n = MINOR(inode->i_rdev);
+ 	filp->private_data = (void *) (unsigned long) n;
+ 
+ 	for (i = 0; i < ARRAY_SIZE(chardevs); ++i)
+ 		if (chardevs[i].minor == n) {
+-			unlock_kernel();
++			mutex_unlock(&aoechr_mutex);
+ 			return 0;
+ 		}
+-	unlock_kernel();
++	mutex_unlock(&aoechr_mutex);
+ 	return -EINVAL;
+ }
+ 

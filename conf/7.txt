@@ -1,0 +1,9 @@
+The skb_linearize cleanup by Herbert Xu ...
+
+  http://www.kernel.org/pub/linux/kernel/v2.6/snapshots/patch-2.6.17-git1.log
+  http://www.kernel.org/git/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commitdiff;h=364c6badde0dd62a0a38e5ed67f85d87d6665780;hp=932ff279a43ab7257942cddff2595acd541cc49b
+
+... put the skb_is_nonlinear check into skb_linearize and made the
+GFP_ATOMIC parameter unecessary.  This change is expected to show up
+in 2.6.18 and up (as well as the development kernels based on
+2.6.17).

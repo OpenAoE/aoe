@@ -1,0 +1,12 @@
+The big kernel lock (BKL) was removed in Jan 2011 for 2.6.39, and
+before that, trivial users of the BKL were migrated via script to use
+a mutex in Jun 2010 via commit 2a48fc0ab2424.
+
+The changes in 35 follow suit.
+
+The mutex core was added by Ingo Molnar in commit 6053ee3b32e3437 in
+January 2006 for 2.6.16-rc1.  We could tell from the test 6 results
+whether we have a really old kernel without mutexes (but with the
+BKL), but we'd better just use the BKL when it's in the kernel, since
+we were originally advised to use it even though it was already
+planned for removal at the time.

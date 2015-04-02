@@ -1,0 +1,76 @@
+.TH aoe-interfaces 8
+.SH NAME
+aoe-interfaces \- restrict aoe driver to specified network interfaces
+.SH SYNOPSIS
+.nf
+.B aoe-interfaces [dev1] [dev2 ...]
+.B aoe-interfaces -c
+.fi
+.SH DESCRIPTION
+The
+.I aoe-interfaces
+command tells the aoe driver to ignore ATA over Ethernet (AoE) traffic
+on all but the specified network interfaces.  It is analogous to the
+\fIaoe_iflist\fP module load option.
+.PP
+If neither the \fIaoe_iflist\fP module load option nor the
+\fIaoe-interfaces\fP command are used, the aoe driver will use any
+network interface for AoE traffic.  Using \fIaoe-interfaces\fP to
+limit AoE to only trusted networks prevents the case where a rogue AoE
+target appears on a public network, diverting data from the legitimate
+AoE target.  Such an imposter target effectively corrupts the data on
+the legitimate target.
+.PP
+If the aoe driver is a module, then calling 
+.I aoe-interfaces
+without arguments will display the current interfaces list.  If it
+hasn't been set then the output will be blank.
+.PP
+It's good to run the 
+.I aoe-discover
+command after setting the AoE interfaces list.
+.SH OPTIONS
+.TP
+\fB-c\fP
+The \fB-c\fP flag will clear the interface access list, permitting any interface to be used.
+.SH EXAMPLE
+In this example, the root user on a host named
+.I nai
+loads the aoe module with only eth0 allowable for AoE traffic.  After
+remembering that shelf 7 is on eth3, this
+sysadmin uses 
+.I aoe-interfaces
+to add eth3 to the list of allowable network interfaces and then
+calls
+.I aoe-discover
+to ask the aoe driver to look for new AoE devices.
+.IP
+.EX
+.nf
+nai:~# modprobe aoe aoe_iflist="eth0"
+nai:~# aoe-stat
+   e10.9            eth0              up
+nai:~# aoe-interfaces eth0 eth3
+nai:~# aoe-discover
+nai:~# aoe-stat
+    e7.0            eth3              up
+    e7.1            eth3              up
+    e7.2            eth3              up
+    e7.3            eth3              up
+    e7.4            eth3              up
+    e7.5            eth3              up
+    e7.6            eth3              up
+    e7.7            eth3              up
+    e7.8            eth3              up
+    e7.9            eth3              up
+   e10.9            eth0              up
+nai:~# aoe-interfaces
+eth0 eth3
+.fi
+.EE
+.SH "SEE ALSO"
+.IR aoe-discover (8),
+.IR aoe-stat (8),
+.IR aoetools (8).
+.SH AUTHOR
+Ed L. Cashin (ecashin@coraid.com)

@@ -1,0 +1,12 @@
+diff -upr cdc4/linux/drivers/block/aoe/aoechr.c cdc5/linux/drivers/block/aoe/aoechr.c
+--- cdc4/linux/drivers/block/aoe/aoechr.c	2013-06-04 14:49:44.000000000 -0400
++++ cdc5/linux/drivers/block/aoe/aoechr.c	2013-06-04 14:53:53.000000000 -0400
+@@ -286,7 +286,7 @@ aoechr_init(void)
+ 		return PTR_ERR(aoe_class);
+ 	}
+ 	for (i = 0; i < ARRAY_SIZE(chardevs); ++i)
+-		class_device_create(aoe_class,
++		class_device_create(aoe_class, NULL,
+ 					MKDEV(AOE_MAJOR, chardevs[i].minor),
+ 					NULL, chardevs[i].name);
+ 

@@ -1,0 +1,72 @@
+.TH aoe-mkshelf 8
+.SH NAME
+aoe-mkshelf \- create special device files for one shelf address
+.SH SYNOPSIS
+.nf
+.B aoe-mkshelf {device-dir} {shelf-address}
+.B env n_partitions=1 aoe-mkshelf {device-dir} {shelf-address}
+.fi
+.SH DESCRIPTION
+The
+.I aoe-mkshelf
+command is not needed on systems that have udev installed and 
+is incompatible with aoe drivers that have the \fIaoe_dyndevs\fP
+module parameter set to 1.
+.PP
+Systems lacking udev and having an aoe driver that uses static minor
+device numbers can use \fIaoe-mkshelf\fP to create the block special
+files necessary to access the AoE devices with the given shelf
+address.
+.PP
+All aoe drivers prior to \fIaoe6-50\fP use static minor device
+numbers.  Versions 50 and up use dynamic minor device numbers
+when the module parameter aoe_dyndevs=1 is set.
+.PP
+If you are using static minor device numbers and your aoe driver
+supports only one partition per device (whole-disk 
+partitions), then the device files must match, and you should use the 
+.I n_partitions
+environment variable described below.
+.SS Arguments
+.TP
+\fBdevice-dir\fP
+This should be the name of the directory where the block device files
+will be created.
+.TP
+\fBshelf-address\fP
+This is the AoE major address, or shelf address, for which to create
+device nodes.  For example, specifying a shelf address of 1 means that
+the e1.* device nodes will be created in \fBdevice-dir\fP.
+.SH ENVIRONMENT VARIABLES
+If the
+.I n_partitions
+variable is set in the environment, it will override the default
+number of partitions per aoe disk, namely 16.
+.SH EXAMPLE
+In this example, the root user on a host named
+.I nai
+creates special files for using the aoe disks in shelf 7.  Then he
+remembers that the driver doesn't have partition support, so the
+command is called again with \fIn_partitions\fP set to 1.
+.IP
+.EX
+.nf
+nai:~# aoe-mkshelf /dev/etherd 7
+nai:~# ls /dev/etherd/e7.* | wc -l
+160
+nai:~# rm /dev/etherd/e7.*        
+nai:~# n_partitions=1 aoe-mkshelf /dev/etherd 7
+nai:~# ls /dev/etherd/e7.* | wc -l
+10
+nai:~# 
+.fi
+.EE
+.SH "SEE ALSO"
+.IR aoe-discover (8),
+.IR aoe-interfaces (8),
+.IR aoe-mkdevs (8),
+.IR aoe-stat (8),
+.IR aoetools (8),
+.IR udev (7).
+.SH AUTHOR
+Ed L. Cashin (ecashin@coraid.com)

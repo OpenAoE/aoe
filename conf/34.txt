@@ -1,0 +1,62 @@
+By 2.6.36, they had taken away the owner field in the struct attribute
+defined in include/linux/sysfs.h.  There are some relevant changelog
+excerpts below.
+
+commit 6fd69dc578fa0b1bbc3aad70ae3af9a137211707
+Author: Guenter Roeck <guenter.roeck@ericsson.com>
+Date:   Wed Jul 28 22:09:26 2010 -0700
+
+    sysfs: Remove owner field from sysfs struct attribute
+    
+    Signed-off-by: Guenter Roeck <guenter.roeck@ericsson.com>
+    Acked-by: Tejun Heo <tj@kernel.org>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
+
+diff --git a/include/linux/sysfs.h b/include/linux/sysfs.h
+...
+commit 01e8ef11bc1a74e65678ed55795f59266d4add01
+Author: Parag Warudkar <parag.lkml@gmail.com>
+Date:   Sat Oct 18 20:28:50 2008 -0700
+
+    x86: sysfs: kill owner field from attribute
+    
+    Tejun's commit 7b595756ec1f49e0049a9e01a1298d53a7faaa15 made sysfs
+    attribute->owner unnecessary.  But the field was left in the structure to
+    ease the merge.  It's been over a year since that change and it is now
+    time to start killing attribute->owner along with its users - one arch at
+    a time!
+    
+    This patch is attempt #1 to get rid of attribute->owner only for
+    CONFIG_X86_64 or CONFIG_X86_32 .  We will deal with other arches later on
+    as and when possible - avr32 will be the next since that is something I
+    can test.  Compile (make allyesconfig / make allmodconfig / custom config)
+    and boot tested.
+    
+    akpm: the idea is that we put the declaration of sttribute.owner inside
+    `#ifndef CONFIG_X86'.  But that proved to be too ambitious for now because
+    new usages kept on turning up in subsystem trees.
+...
+commit 7b595756ec1f49e0049a9e01a1298d53a7faaa15
+Author: Tejun Heo <htejun@gmail.com>
+Date:   Thu Jun 14 03:45:17 2007 +0900
+
+    sysfs: kill unnecessary attribute->owner
+    
+    sysfs is now completely out of driver/module lifetime game.  After
+    deletion, a sysfs node doesn't access anything outside sysfs proper,
+    so there's no reason to hold onto the attribute owners.  Note that
+    often the wrong modules were accounted for as owners leading to
+    accessing removed modules.
+    
+    This patch kills now unnecessary attribute->owner.  Note that with
+    this change, userland holding a sysfs node does not prevent the
+    backing module from being unloaded.
+    
+    For more info regarding lifetime rule cleanup, please read the
+    following message.
+    
+      http://article.gmane.org/gmane.linux.kernel/510293
+    
+    (tweaked by Greg to not delete the field just yet, to make it easier to
+    merge things properly.)
+

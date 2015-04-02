@@ -1,0 +1,19 @@
+These changes from Eric W. Biederman introduced network namespaces in
+2.6.14.
+
+  commit 881d966b48b035ab3f3aeaae0f3d3f9b584f45b2
+  commit e730c15519d09ea528b4d2f1103681fa5937c0e6
+
+Later, YOSHIFUJI Hideaki made the nd_net member inaccessible.
+
+  commit c346dca10840a874240c78efe3f39acf4312a1f2
+
+The three states are,
+
+  nons		- before namespaces
+  nd_net	- namespaces with direct access to nd_net member
+  dev_net	- access via dev_net	NEW
+
+----
+In 2.6.31, nd_net is visible again, so we need to look for and use
+dev_net when it's present instead of checking for nd_net first.

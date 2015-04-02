@@ -1,0 +1,13 @@
+diff -upr a/linux/drivers/block/aoe/aoe.h b/linux/drivers/block/aoe/aoe.h
+--- a/linux/drivers/block/aoe/aoe.h	2013-06-04 18:50:11.000000000 -0400
++++ b/linux/drivers/block/aoe/aoe.h	2013-06-04 18:48:11.000000000 -0400
+@@ -266,9 +266,3 @@ void aoedbg_rtt(struct aoedev *d, struct
+ void aoedbg_devinit(struct aoedev *d);
+ void aoedbg_undbg(struct aoedev *d);
+ void aoedbg_exit(void);
+-
+-/* compatibility:
+- * old kernels without compound_trans_head usually do not care if we make
+- * count of tail pages temporarily positive
+- */
+-static inline struct page *compound_trans_head(struct page *p) {return p;}

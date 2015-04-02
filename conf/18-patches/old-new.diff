@@ -1,0 +1,11 @@
+--- aoe6-53-2.6.23.1/linux/drivers/block/aoe/aoeblk.c.20071023	2007-10-23 18:55:08.000000000 -0400
++++ aoe6-53-2.6.23.1/linux/drivers/block/aoe/aoeblk.c	2007-10-23 18:55:23.000000000 -0400
+@@ -341,7 +341,7 @@ aoeblk_init(void)
+ {
+ 	buf_pool_cache = kmem_cache_create("aoe_bufs",
+ 					   sizeof(struct buf),
+-					   0, 0, NULL, NULL);
++					   0, 0, NULL);
+ 	if (buf_pool_cache == NULL)
+ 		return -ENOMEM;
+ 

@@ -1,0 +1,106 @@
+This directory contains files to help the build system adjust the
+driver sources to fit a particular kernel.
+
+Originally the patches here handled only two states for each
+compatibility issue: old and new.  A patch that updated the driver
+from compatibility with "old" kernels to "new" ones was included for
+each patch.
+
+The increasing amount of churn in the Linux kernel, especially in
+sysfs, has caused many problem areas to have multiple states---not
+just the two old and new states.
+
+Where there are more than two possible states, descriptive tags will
+be used instead of "old" and "new".  Currently, the patches will get
+from any state to any other state with a single patch operation.
+
+(This is a complete graph, where the states are vertices and the
+patches are edges, which is fine as long as N*(N-1)/2 is smallish.  By
+patching more than once and ordering the states, it would be possible
+and pretty easy to have only N (or even N-1) patches, but we don't
+need that now.)
+
+Description of files:
+
+  N.txt       A description of the compatibility issue.
+
+  N-av.sh     A script that says whether the aoe sources are old or
+              new style (or just emits the "tag" for the style).
+
+  N-kv.sh     A script that says whether the kernel sources are old or
+              new style (or emits a more general tag for the style).
+
+  N.c         A minimal C file that is used by N-kv.sh.
+
+  N-{tag}.c   A minimal C file that is used by N-kv.sh to detect the
+              state identified by this tag.
+
+  N-patches/a-b.diff
+
+              A patch that will change style-"a" aoe sources to "b"
+              style, where "a" and "b" are the above mentioned tags.
+
+To support the way the "realrealclean" Makefile target reverts to
+unconfigured sources, the unconfigured state for a conf test, which by
+convention is the one that matches the newest kernels, is marked with
+NEW in its .txt file.
+
+There is a bit of infrastructure that helps me to insert a new test
+after an old one.  For example, test 15 today handles two related
+changes, but RHEL 5.2 has makes one of them inappropriate.  Now I must
+split test 15 into two separate tests.  The scripts below help.
+
+  bump.sh     print git commands that will increment the number of
+	      tests after and including the specified test
+
+  kv.sh	      common code for *-kv.sh scripts, including the "what is
+	      my test number" code
+
+  pairs.sh    print the needed patches for a set of states
+
+SKIPPING TESTS
+
+  Sometimes if one test says the kernel is "old", then a newer
+  compatibility test (which runs later) becomes irrelevant and can be
+  skipped when the *-kv.sh and *-av.sh scripts both say, "skip".
+
+  The two compatibility tests are thereby simplified.  Hopefully there
+  is little danger that interdependencies between tests will cause
+  problems, because they are always run in strict order.  By
+  searching for "skip" in conf/*.sh, though, they're findable.
+
+DUMMIES
+
+  When older kernels lack a feature that current kernels use, the
+  easiest way to provide backwards compatibility is to create a
+  trivial implementation for the old kernels and keep the code that
+  uses the feature as is.
+
+  If, for example, the code using the feature was removed by the
+  backwards compatibility patch, then more aoe driver code will appear
+  in the compatibility patches, and each time we edit the driver, the
+  patches will need to be recreated.
+
+CHECK WARNINGS
+
+  For the *-kv.sh tests, it's often important to check for compiler
+  warnings or errors, not just a zero status from the "make" command,
+  as illustrated by this improvement to test 31, which allows aoe6-73
+  to build correctly for CentOS 4.7.
+
+  diff --git a/conf/31-kv.sh b/conf/31-kv.sh
+  index 8843a84..0c5a73b 100644
+  --- a/conf/31-kv.sh
+  +++ b/conf/31-kv.sh
+  @@ -1,7 +1,10 @@
+   . conf/kv.sh
+   
+   echo 'obj-$(CONFIG_ATA_OVER_ETH) += '"$TESTNO"'.o' > conf/Makefile
+  -$make_cmd > conf/$TESTNO.log 2>&1
+  -test "$?" = "0" && { echo new; exit 0; }
+  +log=conf/$TESTNO.log
+  +$make_cmd > $log 2>&1
+  +test "$?" = "0" &&
+  +       test -z "`egrep -i '(warning|error).*blk_start_request' $log`" &&
+  +       { echo new; exit 0; }
+   

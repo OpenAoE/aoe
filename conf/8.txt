@@ -1,0 +1,7 @@
+The msleep_interruptible function appears only in 2.6.9 and up, but we
+can supply it for older kernels.
+
+I saw a Fedora Core system with a 2.6.7 kernel for which this test
+didn't work.  Our FC2 install disc comes with 2.6.5, for which this
+test works, and the current FC2 kernel is 2.6.10, so I'm putting the
+issue on the far back burner for now.

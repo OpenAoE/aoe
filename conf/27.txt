@@ -1,0 +1,14 @@
+RHEL 4 has kernel-devel that does not define empty_zero_page.
+
+update 200901:
+
+  In fact, it's easier to kmalloc and use our own zero page for now.
+  I'm disabling this compat test.
+
+update 201208:
+
+  There has been get_zeroed_page since the initial git commit with
+  2.6.12, so I'm using that instead.  Allocating two consecutive
+  pages using kcalloc was resulting in us manipulating the _count
+  of the second page, which was a tail of a compound page.  That
+  resulted in panics on 3.4.y (LXOSI-68).

@@ -1,0 +1,8 @@
+FC2 has a 2.6.5 kernel that lacks a _count member in the page struct.
+Instead, there is a count member.
+
+akpm changed the member name to _count in 2.6.7 to keep people from
+directly changing the member, but there are no macros to do what we
+need to do when we sit between XFS, which gives us zero-ref pages in
+bios, and the network layer, which uses get_page and put_page on pages
+in frags.

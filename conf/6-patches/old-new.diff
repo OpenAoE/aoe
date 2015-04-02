@@ -1,0 +1,14 @@
+--- aoet/linux/drivers/block/aoe/aoecmd.c.old	2007-07-05 11:38:18.000000000 -0400
++++ aoet/linux/drivers/block/aoe/aoecmd.c	2007-07-05 11:43:57.000000000 -0400
+@@ -756,9 +756,9 @@ aoecmd_sleepwork(void *vp)
+ 		ssize = d->gd->capacity;
+ 		bd = bdget_disk(d->gd, 0);
+ 		if (bd) {
+-			down(&bd->bd_inode->i_sem);
++			mutex_lock(&bd->bd_inode->i_mutex);
+ 			i_size_write(bd->bd_inode, (loff_t)ssize<<9);
+-			up(&bd->bd_inode->i_sem);
++			mutex_unlock(&bd->bd_inode->i_mutex);
+ 			bdput(bd);
+ 		}
+ 		spin_lock_irq(&d->lock);

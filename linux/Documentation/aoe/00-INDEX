@@ -1,0 +1,14 @@
+00-INDEX
+	- this file.
+aoe.txt
+	- ATA over Ethernet (AoE) driver user guide and pointer to tools.
+autoload.sh
+	- script for making the AoE driver autoload via /etc/modprobe.conf.
+status.sh
+	- script to collate and present sysfs information about AoE storage.
+todo.txt
+	- list of things yet to be done for the AoE driver.
+udev-install.sh
+	- script to install the aoe-specific udev rules from udev.txt.
+udev.txt
+	- list of udev rules for AoE device node creation.

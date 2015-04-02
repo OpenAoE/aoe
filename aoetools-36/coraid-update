@@ -1,0 +1,82 @@
+#! /bin/sh
+# usage: coraid-update {update file} {AoE target}
+# coraid-update depends upon sysfs mounted on /sys
+
+# The destination must be,
+#   1) an AoE target ready for I/O, and
+#   2) not too big to be an update target
+#
+# Later, when CORAID appliances mark update targets with special ATA
+# device identify content or special target content, a prompt should
+# be added after the check of the target's size if the identifying
+# content is not detected.
+# 
+# The update file must either, 
+#   1) be an SR tarc file that looks OK to the local tar, or
+#   2) any file not ending in ".tarc".
+
+# size of update LUN in /proc/partitions is 40000
+max=70000
+
+usage="usage: coraid-update {update file} {AoE device}"
+if test "$#" != 2; then
+	echo "$usage" 1>&2
+	exit 1
+fi
+update="$1"
+ulb="$2"
+
+# if it's an update target, it should be in `aoe-stat`
+aoe-stat | awk -vt="`basename $ulb`" '
+BEGIN{fail=1}
+$1==t{fail=0}
+END{exit fail}' || {
+	exec 1>&2
+	echo "coraid-update Error: \"$ulb\" is not an AoE target"
+	echo "$usage"
+	exit 1
+}
+
+# it should have a size no larger than $max in /proc/partitions
+t="`echo $ulb | sed 's!^/dev/!!'`"
+awk -vt="$t" '$NF==t{print $3}' /proc/partitions |
+awk -vhi=$max -vdev="$ulb" '
+BEGIN{
+	err = "could not get size of " dev
+} {
+	err = "none"
+	if ($1 > hi) {
+		err = dev " is too large to be an update target"
+		exit
+	}
+} END{
+	if (err != "none") {
+		print "Error coraid-update: " err > "/dev/stderr"
+		exit 1
+	}
+	exit 0
+}' || exit 1
+
+# this test should be removed when it is performed on the appliance
+# 
+# For a 2734080-byte tarc file, an incomplete file of 2727450 bytes passes
+# this test, but one of 2727400 does not.  So this test isn't fullproof.
+# 
+if test "`echo \"$update\" | grep '\.tarc$'`"; then
+	tar tf "$update" > /dev/null 2>&1 || {
+		exec 1>&2
+		echo "coraid-update Error: \"$update\" does not appear to be a valid tarc file"
+		exit 1
+	}
+fi
+if test ! -r "$update"; then
+	echo "coraid-update Error: \"$update\" is not readable" 1>&2
+	exit 1
+fi
+
+# send it over and complain on error
+if ! dd if="$update" of="$ulb" 2> /dev/null || ! sync; then
+	exec 1>&2
+	echo "coraid-update Error: could not successfully write \"$update\" to \"$ulb\""
+	exit 1
+fi

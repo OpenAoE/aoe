@@ -1,0 +1,12 @@
+diff -upr brq1/linux/drivers/block/aoe/aoecmd.c brq2/linux/drivers/block/aoe/aoecmd.c
+--- brq1/linux/drivers/block/aoe/aoecmd.c	2013-05-30 14:22:00.675428624 -0400
++++ brq2/linux/drivers/block/aoe/aoecmd.c	2013-05-30 15:13:17.488489853 -0400
+@@ -1169,7 +1169,7 @@ aoe_end_request(struct aoedev *d, struct
+ 
+ 	/* cf. http://lkml.org/lkml/2006/10/31/28 */
+ 	if (!fastfail)
+-		__blk_run_queue(q);
++		__blk_run_queue(q, 0);
+ }
+ 
+ void

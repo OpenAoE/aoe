@@ -1,0 +1,10 @@
+--- Makefile.20130705	2013-07-05 11:06:02.336589106 -0400
++++ Makefile	2013-07-05 11:06:58.987086749 -0400
+@@ -116,7 +116,6 @@
+ 	@echo "Install directory is $(INSTDIR)"
+ 	mkdir -p $(INSTDIR)
+ 	install -m 644 $(DRIVER_D)/aoe.ko $(INSTDIR)
+-	/sbin/depmod -a
+ 
+ install_nodev: install_modobj
+ # punt if DEVSUBDIR isn't the default.  probably should have cleaner solution.

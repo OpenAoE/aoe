@@ -1,0 +1,41 @@
+diff -upr nons/linux/drivers/block/aoe/aoecmd.c dev_net/linux/drivers/block/aoe/aoecmd.c
+--- nons/linux/drivers/block/aoe/aoecmd.c	2008-08-19 13:25:38.000000000 -0400
++++ dev_net/linux/drivers/block/aoe/aoecmd.c	2008-07-29 16:49:48.000000000 -0400
+@@ -12,6 +12,7 @@
+ #include <linux/moduleparam.h>
+ #include <linux/workqueue.h>
+ #include <linux/kthread.h>
++#include <net/net_namespace.h>
+ #include <asm/unaligned.h>
+ #include <linux/uio.h>
+ #include "aoe.h"
+@@ -393,7 +394,7 @@ aoecmd_cfg_pkts(ushort aoemajor, unsigne
+ 	sl = sl_tail = NULL;
+ 
+ 	read_lock(&dev_base_lock);
+-	for_each_netdev(ifp) {
++	for_each_netdev(&init_net, ifp) {
+ 		dev_hold(ifp);
+ 		if (!is_aoe_netif(ifp)) {
+ 			dev_put(ifp);
+diff -upr nons/linux/drivers/block/aoe/aoenet.c dev_net/linux/drivers/block/aoe/aoenet.c
+--- nons/linux/drivers/block/aoe/aoenet.c	2008-08-19 13:24:51.000000000 -0400
++++ dev_net/linux/drivers/block/aoe/aoenet.c	2008-08-19 11:29:29.000000000 -0400
+@@ -8,6 +8,7 @@
+ #include <linux/blkdev.h>
+ #include <linux/netdevice.h>
+ #include <linux/moduleparam.h>
++#include <net/net_namespace.h>
+ #include <asm/unaligned.h>
+ #include "aoe.h"
+ 
+@@ -168,6 +169,9 @@ aoenet_rcv(struct sk_buff *skb, struct n
+ 	u32 n;
+ 	int sn;
+ 
++	if (dev_net(ifp) != &init_net)
++		goto exit;
++
+ 	skb = skb_share_check(skb, GFP_ATOMIC);
+ 	if (skb == NULL)
+ 		return 0;

@@ -1,0 +1,33 @@
+.TH aoe-revalidate 8
+.SH NAME
+aoe-revalidate \- revalidate the disk size of an aoe device 
+.SH SYNOPSIS
+.nf
+.B aoe-revalidate e{major}.{minor}
+.fi
+.SH DESCRIPTION
+The
+.I aoe-revalidate
+command tells the aoe driver to revalidate the disk size of an open aoe device.
+Normally the aoe driver will only acknowledge changes in an aoe device's
+disk size when the aoe device is not open.
+.PP
+It should be noted that if an aoe device's disk size shrinks in revalidation
+any users may become hopelessly confused when their resumed I/O starts to fail.
+.SH EXAMPLE
+.EX
+.nf
+nai# aoe-stat | grep e1.9
+     e1.9        82.348GB   eth0 up            
+nai# < /dev/etherd/e1.9 sleep 600 &
+[1] 13006
+nai# aoe-revalidate e1.9
+nai# aoe-stat | grep e1.9
+     e1.9       164.696GB   eth0 up            
+.fi
+.EE
+.SH "SEE ALSO"
+.IR aoe-stat (8),
+.IR aoetools (8).
+.SH AUTHOR
+Sam Hopkins (sah@coraid.com)

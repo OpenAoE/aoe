@@ -1,0 +1,18 @@
+diff -upr brq1/linux/drivers/block/aoe/aoecmd.c old/linux/drivers/block/aoe/aoecmd.c
+--- brq1/linux/drivers/block/aoe/aoecmd.c	2013-05-30 14:22:00.675428624 -0400
++++ old/linux/drivers/block/aoe/aoecmd.c	2013-05-30 15:08:06.359447422 -0400
+@@ -1168,8 +1168,12 @@ aoe_end_request(struct aoedev *d, struct
+ 	} while (__blk_end_request(rq, bok ? 0 : -EIO, bio->bi_size));
+ 
+ 	/* cf. http://lkml.org/lkml/2006/10/31/28 */
+-	if (!fastfail)
+-		__blk_run_queue(q);
++	if (!fastfail) {
++		if (!blk_queue_plugged(q))
++			q->request_fn(q);
++		else
++			__generic_unplug_device(q);
++	}
+ }
+ 
+ void

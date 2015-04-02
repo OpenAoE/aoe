@@ -1,0 +1,29 @@
+Kernel 2.6.25 changed the way block devices appear in sysfs, and we
+now must use "core devices" instead of raw disks.  See,
+
+  commit edfaa7c36574f1bf09c65ad602412db9da5f96bf
+
+... for details.
+
+Then 2.6.28 made the "dev" member inaccessible, so we must use the new
+disk_to_dev.
+
+  commit ed9e1982347b36573cd622ee5f4e2a7ccd79b3fd
+
+The three states are,
+
+  gd
+
+    Pre-2.6.25, with a pointer to gendisk passed to
+    aoedisk_show_state.
+
+  dev
+
+    A struct device pointer is passed to aoedisk_show_state, and such
+    a pointer is accessible via gd->dev.
+
+    The gendisk struct doesn't have a kobj member.
+
+  dtd	NEW
+
+    The gd->dev member is inaccessible as of 2.6.28.

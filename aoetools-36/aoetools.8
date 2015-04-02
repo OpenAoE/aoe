@@ -1,0 +1,57 @@
+.TH aoetools 8
+.SH NAME
+aoetools \- utilities for AoE on systems running Linux 2.6 and up
+.SH DESCRIPTION
+The
+.I aoetools
+package contains scripts and commands that interact with,
+support, and supplement the
+aoe driver in the Linux kernel.
+.TP
+.BI aoe-discover
+tell aoe driver to discover AoE devices
+.TP
+.BI aoe-flush
+flush the down devices out of the aoe driver
+.TP
+.BI aoe-interfaces
+restrict aoe driver to specified network interfaces
+.TP
+.BI aoe-mkdevs
+create special device files for system without udev
+.TP
+.BI aoe-mkshelf
+create device files for one shelf address for system without udev
+.TP
+.BI aoe-revalidate
+revalidate the disk size of an aoe device
+.TP
+.BI aoe-stat
+collate and present information about AoE storage
+.TP
+.BI aoe-version
+display version numbers of AoE-related software
+.TP
+.BI coraid-update
+send updates to CORAID appliances
+.TP
+.BI sos-linux
+collect AoE-related information about the localhost
+.TP
+.BI aoe-sancheck
+perform an analysis of the AoE storage network
+.SH "SEE ALSO"
+.IR aoe-discover (8),
+.IR aoe-flush (8),
+.IR aoe-interfaces (8),
+.IR aoe-mkdevs (8),
+.IR aoe-mkshelf (8),
+.IR aoe-revalidate (8),
+.IR aoe-stat (8),
+.IR aoe-version (8),
+.IR aoecfg (8),
+.IR aoeping (8),
+.IR coraid-update (8),
+.IR sos-linux (8),
+.IR aoe-sancheck (8),
+.IR udev (7).

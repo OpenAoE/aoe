@@ -1,0 +1,63 @@
+.TH aoe-discover 8
+.SH NAME
+aoe-discover \- tell aoe driver to discover AoE devices
+.SH SYNOPSIS
+.nf
+.B aoe-discover
+.fi
+.SH DESCRIPTION
+The
+.I aoe-discover
+command tells the aoe driver to discover ATA over Ethernet (AoE)
+devices on the network.  All network interfaces will be probed with a
+AoE config query broadcast.  
+.PP
+If the 
+.I aoe-interfaces
+command has limited the allowable network interfaces, only devices
+discovered via allowable interfaces will become available.  The
+default is to make available all AoE devices found on all accessible
+ethernet networks.
+.PP
+It's good to run the 
+.I aoe-discover
+command after running \fIaoe-interfaces\fP.
+.SH EXAMPLE
+In this example, the root user on a host named
+.I nai
+loads the aoe module with only eth0 allowable for AoE traffic.  After
+remembering that shelf 7 is on eth3, this
+sysadmin uses 
+.I aoe-interfaces
+to add eth3 to the list of allowable network interfaces and then
+calls
+.I aoe-discover
+to ask the aoe driver to look for new AoE devices.
+.IP
+.EX
+.nf
+nai:~# modprobe aoe aoe_iflist="eth0"
+nai:~# aoe-stat
+   e10.9            eth0              up
+nai:~# aoe-interfaces eth0 eth3
+nai:~# aoe-discover
+nai:~# aoe-stat
+    e7.0            eth3              up
+    e7.1            eth3              up
+    e7.2            eth3              up
+    e7.3            eth3              up
+    e7.4            eth3              up
+    e7.5            eth3              up
+    e7.6            eth3              up
+    e7.7            eth3              up
+    e7.8            eth3              up
+    e7.9            eth3              up
+   e10.9            eth0              up
+.fi
+.EE
+.SH "SEE ALSO"
+.IR aoe-interfaces (8),
+.IR aoe-stat (8),
+.IR aoetools (8).
+.SH AUTHOR
+Ed L. Cashin (ecashin@coraid.com)

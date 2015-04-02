@@ -1,0 +1,38 @@
+For the 3.2 kernel, a build optimization was included where commonly
+used header contents were factored out of module.h.
+
+We have to include backwards compatibility with kernels that didn't
+have export.h.
+
+Information from git history:
+
+	module.h: split out the EXPORT_SYMBOL into export.h
+	author	Paul Gortmaker <paul.gortmaker@windriver.com>	
+		Mon, 23 May 2011 18:11:39 +0000 (14:11 -0400)
+	committer	Paul Gortmaker <paul.gortmaker@windriver.com>	
+		Mon, 31 Oct 2011 13:20:11 +0000 (09:20 -0400)
+	A lot of files pull in module.h when all they are really
+	looking for is the basic EXPORT_SYMBOL functionality. The
+	recent data from Ingo[1] shows that this is one of several
+	instances that has a significant impact on compile times,
+	and it should be targeted for factoring out (as done here).
+
+	Note that several commonly used header files in include/*
+	directly include <linux/module.h> themselves (some 34 of them!)
+	The most commonly used ones of these will have to be made
+	independent of module.h before the full benefit of this change
+	can be realized.
+
+	We also transition THIS_MODULE from module.h to export.h,
+	since there are lots of files with subsystem structs that
+	in turn will have a struct module *owner and only be doing:
+
+	.owner = THIS_MODULE;
+
+	and absolutely nothing else modular. So, we also want to have
+	the THIS_MODULE definition present in the lightweight header.
+
+	[1] https://lkml.org/lkml/2011/5/23/76
+
+	Signed-off-by: Paul Gortmaker <paul.gortmaker@windriver.com>
+

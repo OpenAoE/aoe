@@ -1,0 +1,12 @@
+diff -uprN a/linux/drivers/block/aoe/aoenet.c b/linux/drivers/block/aoe/aoenet.c
+--- a/linux/drivers/block/aoe/aoenet.c	2007-07-09 16:11:22.000000000 -0400
++++ b/linux/drivers/block/aoe/aoenet.c	2007-07-09 16:11:22.000000000 -0400
+@@ -157,7 +157,7 @@ aoenet_xmit(struct sk_buff *sl)
+  * 	wrong.
+  */
+ static int
+-aoenet_rcv(struct sk_buff *skb, struct net_device *ifp, struct packet_type *pt)
++aoenet_rcv(struct sk_buff *skb, struct net_device *ifp, struct packet_type *pt, struct net_device *orig_dev)
+ {
+ 	struct aoe_hdr *h;
+ 	struct aoe_atahdr *ah;

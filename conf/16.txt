@@ -1,0 +1,6 @@
+In 2.6.22, the sk_buff members were changed around, so we use a
+function that provides access to the packet.  That change is handled
+by the last test.
+
+RHEL 5.2 introduced kernel 2.6.18-92.el5-i686, which DOES have
+skb_reset_mac_header et al., but which DOES NOT have for_each_netdev.

@@ -1,0 +1,16 @@
+diff -upr dc/linux/drivers/block/aoe/aoechr.c dcd/linux/drivers/block/aoe/aoechr.c
+--- dc/linux/drivers/block/aoe/aoechr.c	2013-06-19 15:52:32.000000000 -0400
++++ dcd/linux/drivers/block/aoe/aoechr.c	2013-06-04 14:57:11.000000000 -0400
+@@ -286,9 +286,9 @@ aoechr_init(void)
+ 		return PTR_ERR(aoe_class);
+ 	}
+ 	for (i = 0; i < ARRAY_SIZE(chardevs); ++i)
+-		device_create(aoe_class, NULL,
+-			      MKDEV(AOE_MAJOR, chardevs[i].minor), NULL,
+-			      chardevs[i].name);
++		device_create_drvdata(aoe_class, NULL,
++					MKDEV(AOE_MAJOR, chardevs[i].minor),
++					NULL, chardevs[i].name);
+ 
+ 	return 0;
+ }

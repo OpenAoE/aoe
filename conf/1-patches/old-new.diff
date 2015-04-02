@@ -1,0 +1,13 @@
+diff -uprN a/linux/drivers/block/aoe/disk_attr.h b/linux/drivers/block/aoe/disk_attr.h
+--- a/linux/drivers/block/aoe/disk_attr.h	2007-01-23 13:55:47.000000000 -0500
++++ b/linux/drivers/block/aoe/disk_attr.h	2007-01-23 13:55:47.000000000 -0500
+@@ -1,8 +1 @@
+-/* This struct is not defined in kernels 2.6.10 and earlier.
+- * It is defined here for compatibility with those kernels.
+- */
+-
+-struct disk_attribute {
+-	struct attribute attr;
+-	ssize_t (*show)(struct gendisk *, char *);
+-};
++/* struct disk_attribute is defined in kernel headers */

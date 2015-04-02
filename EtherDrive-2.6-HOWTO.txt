@@ -1,0 +1,1592 @@
+  EtherDrive(R) storage and Linux 2.6
+  Sam Hopkins and Ed L. Cashin {sah,ecashin}@coraid.com
+  April 2008
+
+  Using network data storage with ATA over Ethernet
+  <http://www.coraid.com/documents/AoEr10.txt> is easy after understand-
+  ing a few simple concepts.  This document explains how to use AoE tar-
+  gets from a Linux-based Operating System, but the basic principles are
+  applicable to other systems that use AoE devices. Below we begin by
+  explaining the key components of the network communication method, ATA
+  over Ethernet (AoE). Next, we discuss the way a Linux host uses AoE
+  devices, providing serveral examples.  A list of frequently asked
+  questions follows, and the document ends with supplementary informa-
+  tion.
+  ______________________________________________________________________
+
+  Table of Contents
+
+
+
+  1. The EtherDrive System
+  2. How Linux Uses The EtherDrive System
+  3. The ATA over Ethernet Tools
+     3.1 Limiting AoE traffic to certain network interfaces
+
+  4. EtherDrive storage and Linux Software RAID
+     4.1 Example: RAID 5 with mdadm
+     4.2 Important notes
+
+  5. FAQ (contains important info)
+     5.1 Q: How does the system know about the AoE targets on the
+         network?
+     5.2 Q: How do I see what AoE devices the system knows about?
+     5.3 Q: What is the "closewait" state?
+     5.4 Q: How does the system know an AoE device has failed?
+     5.5 Q: How do I take an AoE device out of the failed state?
+     5.6 Q: How can I use LVM with my EtherDrive storage?
+     5.7 Q: I get an "invalid module format" error on modprobe.
+         Why?
+     5.8 Q: Can I allow multiple Linux hosts to use a filesystem that is
+         on my EtherDrive storage?
+     5.9 Q: Can you give me an overview of GFS and related software?
+        5.9.1 Background
+        5.9.2 Hardware
+        5.9.3 Software
+        5.9.4 Use
+        5.9.5 Fencing
+     5.10 Q: How can I make a RAID of more than 27 components?
+     5.11 Q: Why do my device nodes disappear after a reboot?
+     5.12 Q: Why does RAID initialization seem slow?
+     5.13 Q: I can only use shelf zero! Why won't e1.9 work?
+     5.14 Q: How can I start my AoE storage on boot and shut it down when
+          the system shuts down?
+     5.15 Q: Why do I get "permission denied" when I'm root?
+     5.16 Q: Why does fdisk ask me for the number of cylinders?
+     5.17 Q: Can I use AoE equipment with Oracle software?
+     5.18 Q: Why do I have intermittent problems?
+     5.19 Q: How can I avoid running out of memory when copying large
+          files?
+     5.20 Q: Why doesn't the aoe driver notice that an AoE device has
+          disappeared or changed size?
+     5.21 Q: My NFS client hangs when I export a filesystem on an AoE
+          device.
+     5.22 Q: Why do I see "unknown partition table" errors in my
+          logs?
+     5.23 Q: Why do I get better throughput to a file on an AoE device
+          than to the device itself?
+     5.24 Q: How can I boot diskless systems from my Coraid EtherDrive
+          devices?
+     5.25 Q: What filesystems do you recommend for very large block
+          devices?
+     5.26 Q: Why does umount say, "device is busy"?
+     5.27 Q: How do I use the multiple network path support in driver
+          versions 33 and up?
+     5.28 Q: Why does "xfs_check" say "out of memory"?
+     5.29 Q: Can virtual machines running on VMware ESX use AoE over
+          jumbo frames?
+     5.30 Q: Can I use SMART with my AoE devices?
+
+  6. Jumbo Frames
+     6.1 Linux NIC MTU
+     6.2 Network Switch MTU
+     6.3 SR MTU
+
+  7. Appendix A: Archives
+     7.1 Example: RAID 5 with the raidtools
+     7.2 Example: RAID 10 with mdadm
+     7.3 Important notes
+     7.4 Old FAQ List
+        7.4.1 Q: When I "modprobe aoe", it takes a long time. The
+              system seems to hang. What could be the problem?
+
+
+  ______________________________________________________________________
+
+  11..  TThhee EEtthheerrDDrriivvee SSyysstteemm
+
+  The ATA over Ethernet network protocol allows any type of data storage
+  to be used over a local ethernet network. An "AoE target" receives ATA
+  read and write commands, executes them, and returns responses to the
+  "AoE initiator" that is using the storage.
+
+  These AoE commands and responses appear on the network as ethernet
+  frames with type 0x88a2, the IANA registered Ethernet type for ATA
+  over Ethernet (AoE) <http://www.coraid.com/documents/AoEr10.txt>. An
+  AoE target is identified by a pair of numbers: the shelf address, and
+  the slot address.
+
+  For example, the Coraid SR appliance can perform RAID internally on
+  its SATA disks, making the resulting storage capacity available on the
+  ethernet network as one or more AoE targets. All of the targets will
+  have the same shelf address because they are all exported by the same
+  SR. They will have different AoE slot addresses, so that each AoE
+  target is individually addressable. The SR documentation calls each
+  target a "LUN". Each LUN behaves like a network disk.
+
+  Using EtherDrive technology like the SR appliance is as simple as
+  sending and receiving AoE packets.
+
+  To a Linux-based system running the "aoe" driver, it doesn't matter
+  what the remote AoE device really is. All that matters is that the AoE
+  protocol can be used to communicate with a device identified by a
+  certain shelf and slot address.
+
+  22..  HHooww LLiinnuuxx UUsseess TThhee EEtthheerrDDrriivvee SSyysstteemm
+
+  For security and performance reasons, many people use a second,
+  dedicated network interface card (NIC) for ATA over Ethernet traffic.
+
+  A NIC must be up before it can perform any networking, including AoE.
+  On examining the output of the ifconfig command, you should see your
+  AoE NIC listed as "UP" before attempting to use an AoE device
+  reachable via that NIC.
+
+  You can aaccttiivvaattee tthhee NNIICC with a simple ifconfig eth1 up, using the
+  appropriate device name instead of "eth1". Note that assigning an IP
+  address is not necessary if the NIC is being used only for AoE
+  traffic, but having an IP address on a NIC used for AoE will not
+  interfere with AoE.
+
+  On a Linux system, block devices are used via special files called
+  device nodes. A familiar example is /dev/hda. When a block device node
+  is opened and used, the kernel translates operations on the file into
+  operations on the corresponding hardware EtherDrive.
+
+  Each accessible AoE target on your network is represented by a disk
+  device node in the /dev/etherd/ directory and can be used just like
+  any other direct attached disk. The "aoe" device driver is an open-
+  source loadable kernel module authored by Coraid. It translates system
+  reads/writes on a device into AoE request frames for the associated
+  remote EtherDrive storage device, retransmitting requests if needed.
+  When the AoE responses from the device are received, the appropriate
+  system read/write call is acknowledged as complete. The aoe device
+  driver handles retransmissions in the event of network congestion.
+
+  The association of AoE targets on your network to device nodes in
+  /dev/etherd/ follows a simple naming scheme. Each device node is named
+  eX.Y, where X represents a shelf address and Y represents a slot
+  address. Both X and Y are decimal integers. As an example, the
+  following command displays the first 4 KiB of data from the AoE target
+  with shelf address 0 and slot address 1.
+
+
+
+       dd if=/dev/etherd/e0.1 bs=1024 count=4 | hexdump -C
+
+
+
+  Creating an ext3 filesystem on the same AoE target is as simple as ...
+
+
+
+       mkfs.ext3 /dev/etherd/e0.1
+
+
+
+  Notice that the filesystem goes directly on the block device. There's
+  no need for any intermediate "format" or partitioning step.
+
+  Although partitions are not usually needed, they may be created using
+  a tool like fdisk or GNU parted.  Please see the ``FAQ entry about
+  partition tables'' for important caveats.
+
+  Partitions are used by adding "p" and the partition number to the
+  device name. For example, /dev/etherd/e0.3p1 is the first partition on
+  the AoE target with shelf address zero and slot address three.
+
+  After creating a filesystem, it can be mounted in the normal way. It
+  is important to remember to unmount the filesystem before shutting
+  down your network devices. Without networking, there is no way to
+  unmount a filesystem that resides on a disk across the network.
+
+  It is best to update your init scripts so that filesystems on
+  EtherDrive storage is unmounted early in the system-shutdown
+  procedure, before network interfaces are shut down.  ``An example'' is
+  found below in the ``list of Frequently Asked Questions''.
+
+  The device nodes in /dev/etherd/ are usually created in one of three
+  ways:
+
+
+  1. Most distributions today use udev to dynamically create device
+     nodes as needed. You can configure udev to create the device nodes
+     for your AoE disks. (For an example of udev configuration rules,
+     see ``Why do my device nodes disappear after a reboot?'' in the
+     ``FAQ section'' below.)
+
+  2. If you are using the standalone aoe driver, as opposed to the one
+     distributed with the Linux kernel, and you are not using udev, the
+     Makefile will create device nodes for you when you do a "make
+     install".
+
+  3. If you are not using udev you can use static device nodes. Use the
+     aoe_dyndevs=0 module load option for the aoe driver.  (You do not
+     need this option if your aoe driver is older than version aoe6-50.)
+     Then the aoe-mkdevs and aoe-mkshelf scripts in the aoetools
+     <http://aoetools.sourceforge.net/> package can be used to create
+     the static device nodes manually. It is very important to avoid
+     using these static device nodes with an aoe driver that has the
+     aoe_dyndevs module parameter set to 1, because you could
+     accidentally use the wrong device.
+
+  33..  TThhee AATTAA oovveerr EEtthheerrnneett TToooollss
+
+  The aoe kernel driver allows Linux to do ATA over Ethernet. In
+  addition to the aoe driver, there is a collection of helpful programs
+  that operate outside of the kernel, in "user space". This collection
+  of tools and documentation is called the aoetools, and may be found at
+  http://aoetools.sourceforge.net/ <http://aoetools.sourceforge.net/>.
+
+  Current aoe drivers from the Coraid website are bundled with a
+  compatible version of the aoetools. This HOWTO may make reference to
+  commands from the aoetools, like the aoe-stat command.
+
+  33..11..  LLiimmiittiinngg AAooEE ttrraaffffiicc ttoo cceerrttaaiinn nneettwwoorrkk iinntteerrffaacceess
+
+  By default, the aoe driver will use any local network interface
+  available to reach an AoE target. Most of the time, though, the
+  administrator expects legitimate AoE targets to appear only on certain
+  ethernet interfaces, e.g., "eth1" and "eth2".
+
+  Using the aoe-interfaces command from the aoetools package allows the
+  administrator to limit AoE activity to a set list of ethernet
+  interfaces.
+
+  This configuration is especially important when some ethernet
+  interfaces are on networks where an unexpected AoE target with the
+  same shelf and slot address as a production AoE target might appear.
+
+  Please see the aoe-interfaces manpage for more information.
+
+  At module load time the list of allowable interfaces may be set with
+  the "aoe_iflist" module parameter.
+
+
+
+       modprobe aoe 'aoe_iflist=eth2 eth3'
+
+
+
+  44..  EEtthheerrDDrriivvee ssttoorraaggee aanndd LLiinnuuxx SSooffttwwaarree RRAAIIDD
+
+  Some AoE devices are internally redundant. A Coraid SR1521, for
+  example, might be exporting a 14-disk RAID 5 as a single 9.75 terabyte
+  LUN.  In that case, the AoE target itself is performing RAID,
+  enhancing performance and reliability.
+
+  You can also perform RAID on the AoE initiator. Linux Software RAID
+  can increase performance by striping over multiple AoE targets and
+  reliability by using data redundancy. Reading the Linux Software RAID
+  HOWTO <http://www.tldp.org/HOWTO/Software-RAID-HOWTO.html> before you
+  start to work with RAID will likely save time in the long run. The
+  Linux kernel has an "md" driver that performs the Software RAID, and
+  there are several tool sets that allow you to use this kernel feature.
+
+  The main software package for using the md driver is mdadm
+  <http://www.cse.unsw.edu.au/~neilb/source/mdadm/>.  Less popular
+  alternatives include the older raidtools package ``(discussed in the
+  Archives below)'', and EVMS <http://evms.sourceforge.net/>.
+
+
+  44..11..  EExxaammppllee:: RRAAIIDD 55 wwiitthh mmddaaddmm
+
+  In this example we have five AoE targets in shelves 0-4, with each
+  shelf exporting a single LUN 0. The following mdadm command uses these
+  five AoE devices as RAID components, creating a level-5 RAID array.
+  The md configuration information is stored on the components
+  themselves in "md superblocks", which can be examined with another
+  mdadm command.
+
+
+
+       # mdadm -C -n 5 --level=raid5 --auto=md /dev/md0 /dev/etherd/e[0-4].0
+       mdadm: array /dev/md0 started.
+       # mdadm --examine /dev/etherd/e0.0
+       /dev/etherd/e0.0:
+                 Magic : a92b4efc
+               Version : 00.90.00
+                  UUID : 46079e2f:a285bc60:743438c8:144532aa (local to host ellijay)
+       ...
+
+
+
+  The /proc/mdstats file contains summary information about the RAID as
+  reported by the kernel itself.
+
+
+
+       # cat /proc/mdstat
+       Personalities : [raid5] [raid4]
+       md0 : active raid5 etherd/e4.0[5] etherd/e3.0[3] etherd/e2.0[2] etherd/e1.0[1] etherd/e0.0[0]
+             5860638208 blocks level 5, 64k chunk, algorithm 2 [5/4] [UUUU_]
+             [>....................]  recovery =  0.0% (150272/1465159552) finish=23605.3min speed=1032K/sec
+
+       unused devices: <none>
+
+
+
+  Until md finishes initializing the parity of the RAID, performance is
+  sub-optimal, and the RAID will not be usable if one of the components
+  fails during initialization. After initialization is complete, the md
+  device can continue to be used even if one component fails.
+
+  Later the array can be stopped in order to shut it down cleanly in
+  preparation for a system reboot or halt.
+
+
+
+       # mdadm -S /dev/md0
+
+
+
+  In a system init script (see ``the aoe-init example in the FAQ'') an
+  mdadm command can assemble the RAID components using the configuration
+  information that was stored on them when the RAID was created.
+
+
+
+       # mdadm -A /dev/md0 /dev/etherd/e[0-4].0
+       mdadm: /dev/md0 has been started with 5 drives.
+
+
+
+  To make an xfs filesystem on the RAID array and mount it, the
+  following commands can be issued:
+
+
+
+       # mkfs -t xfs /dev/md0
+       # mkdir /mnt/raid
+       # mount /dev/md0 /mnt/raid
+
+
+
+  Once md has finished initializing the RAID, the storage is single-
+  fault tolerant: Any of the components can fail without making the
+  storage unavailable. Once a single component has failed, the md device
+  is said to be in a "degraded" state. Using a degraded array is fine,
+  but a degraded array cannot remain usable if another component fails.
+
+  Adding hot spares makes the array even more robust. Having hot spares
+  allows md to bring a new component into the RAID as soon as one of its
+  components has failed so that the normal state may be achieved as
+  quickly as possible. You can check /proc/mdstat for information on the
+  initialization's progress.
+
+  The new write-intent bitmap feature can dramatically reduce the time
+  needed for re-initialization after a component fails and is later
+  added back to the array. Reducing the time the RAID spends in degraded
+  mode makes a double fault less likely. Please see the mdadm manpages
+  for details.
+
+  44..22..  IImmppoorrttaanntt nnootteess
+
+
+  1. Some Linux distributions come with an mdmonitor service running by
+     default. Unless you configure the mdmonitor to do what you want,
+     consider turning off this service with chkconfig mdmonitor off and
+     /etc/init.d/mdmonitor stop or your system's equivalent commands. If
+     mdadm is running in its "monitor" mode without being properly
+     configured, it may interfere with failover to hot spares, the
+     stopping of the RAID, and other actions.
+
+  2. There is a problem with the way some 2.6 kernels determine whether
+     an I/O device is idle. On these kernels, RAID initialization is
+     about five times slower than it needs to be.
+
+     On these kernels you can do the following to work around the
+     problem:
+
+
+
+       echo 100000 > /proc/sys/dev/raid/speed_limit_max
+       echo 100000 > /proc/sys/dev/raid/speed_limit_min
+
+
+
+  55..  FFAAQQ ((ccoonnttaaiinnss iimmppoorrttaanntt iinnffoo))
+
+  55..11..  QQ:: HHooww ddooeess tthhee ssyysstteemm kknnooww aabboouutt tthhee AAooEE ttaarrggeettss oonn tthhee nneett--
+  wwoorrkk??
+
+  A: When an AoE target comes online, it emits a broadcast frame
+  indicating its presence. In addition to this mechanism, the AoE
+  initiator may send out a query frame to discover any new AoE targets.
+
+  The Linux aoe driver, for example, sends an AoE query once per minute.
+  The discovery can be triggered manually with the "aoe-discover" tool,
+  one of the aoetools <http://aoetools.sourceforge.net/>.
+
+  55..22..  QQ:: HHooww ddoo II sseeee wwhhaatt AAooEE ddeevviicceess tthhee ssyysstteemm kknnoowwss aabboouutt??
+
+  A: The /usr/sbin/aoe-stat program (from the aoetools
+  <http://aoetools.sourceforge.net/>) lists the devices the system
+  considers valid. It also displays the status of the device (up or
+  down). For example:
+
+
+
+       root@makki root# aoe-stat
+             e0.0     10995.116GB   eth0 up
+             e0.1     10995.116GB   eth0 up
+             e0.2     10995.116GB   eth0 up
+             e1.0      1152.874GB   eth0 up
+             e7.0       370.566GB   eth0 up
+
+
+
+  55..33..  QQ:: WWhhaatt iiss tthhee ""cclloosseewwaaiitt"" ssttaattee??
+
+  A: The "down,closewait" status means that the device went down but at
+  least one process still has it open. After all processes close the
+  device, it will become "up" again if it the remote AoE device is
+  available and ready.
+
+  The user can also use the "aoe-revalidate" command to manually cause
+  the aoe driver to query the AoE device. If the AoE device is available
+  and ready, the device state on the Linux host will change from
+  "down,closewait" to "up".
+
+  55..44..  QQ:: HHooww ddooeess tthhee ssyysstteemm kknnooww aann AAooEE ddeevviiccee hhaass ffaaiilleedd??
+
+  A: When an AoE target cannot complete a requested command it will
+  indicate so in the response to the failed request.  The Linux aoe
+  driver will mark the AoE device as failed upon reception of such a
+  response. In addition, if an AoE target has not responded to a prior
+  request within a default timeout (currently three minutes) the aoe
+  driver will fail the device.
+
+  55..55..  QQ:: HHooww ddoo II ttaakkee aann AAooEE ddeevviiccee oouutt ooff tthhee ffaaiilleedd ssttaattee??
+
+  A: If the aoe driver shows the device state to be "down", first check
+  the EtherDrive storage itself and the AoE network. Once any problem
+  has been rectified, you can use the "aoe-revalidate" command from the
+  aoetools <http://aoetools.sourceforge.net/> to ask the aoe driver to
+  change the state back to "up".
+
+  If the Linux Software RAID driver has marked the device as "failed"
+  (so that an "F" shows up in the output of "cat /proc/mdstat"), then
+  you first need to remove the device from the RAID using mdadm. Next
+  you add the device back to the array with mdadm.
+
+  An example follows, showing how (after manually failing e10.0) the
+  device is removed from the array and then added back. After adding it
+  back to the RAID, the md driver begins rebuilding the redundancy of
+  the array.
+
+
+
+  root@kokone ~# cat /proc/mdstat
+  Personalities : [raid1] [raid5]
+  md0 : active raid1 etherd/e10.1[1] etherd/e10.0[0]
+        524224 blocks [2/2] [UU]
+
+  unused devices: <none>
+  root@kokone ~# mdadm --fail /dev/md0 /dev/etherd/e10.0
+  mdadm: set /dev/etherd/e10.0 faulty in /dev/md0
+  root@kokone ~# cat /proc/mdstat
+  Personalities : [raid1] [raid5]
+  md0 : active raid1 etherd/e10.1[1] etherd/e10.0[2](F)
+        524224 blocks [2/1] [_U]
+
+  unused devices: <none>
+  root@kokone ~# mdadm --remove /dev/md0 /dev/etherd/e10.0
+  mdadm: hot removed /dev/etherd/e10.0
+  root@kokone ~# mdadm --add /dev/md0 /dev/etherd/e10.0
+  mdadm: hot added /dev/etherd/e10.0
+  root@kokone ~# cat /proc/mdstat
+  Personalities : [raid1] [raid5]
+  md0 : active raid1 etherd/e10.0[2] etherd/e10.1[1]
+        524224 blocks [2/1] [_U]
+        [=>...................]  recovery =  5.0% (26944/524224) finish=0.6min speed=13472K/sec
+  unused devices: <none>
+  root@kokone ~#
+
+
+
+  55..66..  QQ:: HHooww ccaann II uussee LLVVMM wwiitthh mmyy EEtthheerrDDrriivvee ssttoorraaggee??
+
+  A: With older LVM2 <http://sources.redhat.com/lvm2/> releases, you may
+  need to edit lvm.conf, but the current version of LVM2 supports AoE
+  devices "out of the box".
+
+  You can also create md devices from your aoe devices and tell LVM to
+  use the md devices.
+
+  It's necessary to understand LVM itself in order to use AoE devices
+  with LVM. Besides the manpages for the LVM commands, the LVM HOWTO
+  <http://tldp.org/HOWTO/LVM-HOWTO/> is a big help getting started if
+  you are starting out with LVM.
+
+  If you have an old LVM2 that does not already detect and work with AoE
+  devices, you can add this line to the "devices" block of your
+  lvm.conf.
+
+
+
+       types = [ "aoe", 16 ]
+
+
+
+  If you are creating physical volumes out of RAIDs over EtherDrive
+  storage, make sure to turn on md component detection so that LVM2
+  doesn't go snooping around on the underlying EtherDrive disks.
+
+
+
+       md_component_detection = 1
+
+
+
+  The snapshots feature in LVM2 did not work in early 2.6 kernels.
+  Lately, Coraid customers have reported success using snapshots on AoE-
+  backed logical volumes when using a recent kernel and aoe driver.
+  Older aoe drivers, like version 22, may need a fix
+  <https://bugzilla.redhat.com/attachment.cgi?id=311070> to work
+  correctly with snapshots.
+
+  Customers have reported data corruption and kernel panics when using
+  striped logical volumes (created with the "-i" option to lvcreate)
+  when using aoe driver versions prior to aoe6-48. No such problems
+  occur with normal logical volumes or with Software RAID's striping
+  (RAID 0).
+
+  Most systems have boot scripts that try to detect LVM physical volumes
+  early in the boot process, before AoE devices are available. In
+  playing with LVM, you may need to help LVM to recognize AoE devices
+  that are physical devices by running vgscan after loading the aoe
+  module.
+
+  There have been reports that partitions can interfere with LVM's
+  ability to use an AoE device as a physical volume. For example, with
+  partitions e0.1p1 and e0.1p2 residing on e0.1, pvcreate
+  /dev/etherd/e0.1 might complain,
+
+
+
+       Device /dev/etherd/e0.1 not found.
+
+
+
+  Removing the partitions allows LVM to create a physical volume from
+  e0.1.
+
+  55..77..  QQ:: II ggeett aann ""iinnvvaalliidd mmoodduullee ffoorrmmaatt"" eerrrroorr oonn mmooddpprroobbee.. WWhhyy??
+
+  A: The aoe module and the kernel must be built to match one another.
+  On module load, the kernel version, SMP support (yes or no), the
+  compiler version, and the target processor must be the same for the
+  module as it was building the kernel.
+
+  55..88..  QQ:: CCaann II aallllooww mmuullttiippllee LLiinnuuxx hhoossttss ttoo uussee aa ffiilleessyysstteemm tthhaatt iiss
+  oonn mmyy EEtthheerrDDrriivvee ssttoorraaggee??
+
+  A: Yes, but you're now taking advantage of the flexibility of
+  EtherDrive storage, using it like a SAN. Your software must be
+  "cluster aware", like GFS <http://sources.redhat.com/cluster/gfs/>.
+  Otherwise, each host will assume it is the sole user of the filesystem
+  and data corruption will result.
+
+  55..99..  QQ:: CCaann yyoouu ggiivvee mmee aann oovveerrvviieeww ooff GGFFSS aanndd rreellaatteedd ssooffttwwaarree??
+
+  A: Yes, here's a brief overview.
+
+  55..99..11..  BBaacckkggrroouunndd
+
+  GFS is a scalable, journaled filesystem designed to be used by more
+  than one computer at a time. There is a separate journal for each host
+  using the filesystem. All the hosts working together are called a
+  cluster, and each member of the cluster is called a cluster node.
+
+  To achieve acceptible performance, each cluster node remembers what
+  was on the block device the last time it looked. This is caching,
+  where data from copies in RAM are used temporarily instead of data
+  directly from the block device.
+
+  To avoid chaos, the data in the RAM cache of every cluster node has to
+  match what's on the block device. The members of the cluster (called
+  "cluster nodes") communicate over TCP/IP to agree on who is in the
+  cluster and who has the right to use a particular part of the shared
+  block device.
+
+  55..99..22..  HHaarrddwwaarree
+
+  To allow the cluster nodes to control membership in the cluster and to
+  control access to the shared block storage, "fencing" hardware can be
+  used.
+
+  Some network switches can be dynamically configured to turn single
+  ports on and off, effectively fencing a node off from the rest of the
+  network.
+
+  Remote power switches can be told to turn an outlet off, powering a
+  cluster node down, so that it is certainly not accessing the shared
+  storage.
+
+  55..99..33..  SSooffttwwaarree
+
+  The RedHat Cluster Suite developers have created several pieces of
+  software besides the GFS filesystem itself to allow the cluster nodes
+  to coordinate cluster membership and to control access to the shared
+  block device.
+
+  These parts are listed here, on the GFS Project Page.
+
+  http://sources.redhat.com/cluster/gfs/
+  <http://sources.redhat.com/cluster/gfs/>
+
+  GFS and its related software are undergoing continuous heavy
+  development and are maturing slowly but steadily.
+
+  As might be expected, the devleopers working for RedHat target RedHat
+  Enterprise Linux as the ultimate platform for GFS and its related
+  software. They also use Fedora Core as a platform for testing and
+  innovation.
+
+  That means that when choosing a distribution for running GFS, recent
+  versions of Fedora Core, RedHat Enterprise Linux (RHEL), and RHEL
+  clones like CentOS should be considered. On these platforms, RPMs are
+  available that have a good chance of working "out of the box."
+
+  With a RedHat-based distro like Fedora Core, using GFS means seeking
+  out the appropriate documentation, installing the necessary RPMs, and
+  creating a few text files for configuring the software.
+
+  Here is a good overview of what the process is generally like. Note
+  that if you're using RPMs, then building and installing the software
+  will not be necessary.
+
+  http://sources.redhat.com/cluster/doc/usage.txt
+  <http://sources.redhat.com/cluster/doc/usage.txt>
+
+  55..99..44..  UUssee
+
+  Once you have things ready, using the GFS is like using any other
+  filesystem.
+
+  Performance will be greatest when the filesystem operations of the
+  different nodes do not interfere with one another. For instance, if
+  all the nodes try to write to the same place in a directory or file,
+  much time will be spent in coordinating access (locking).
+
+  An easy way to eliminate a large amount of locking is to use the
+  "noatime" (no access time update) mount option. Even in traditional
+  filesystems the use of this option often results in a dramatic
+  performance benefit, because it eliminates the need to write to the
+  block storage just to record the time that the file was last accessed.
+
+  55..99..55..  FFeenncciinngg
+
+  There are several ways to keep a cluster node from accessing shared
+  storage when that node might have outdated assumptions about the state
+  of the cluster or the storage. Preventing the node from accessing the
+  storage is called "fencing", and it can be accomplished in several
+  ways.
+
+  One popular way is to simply kill the power to the fenced node by
+  using a remote power switch. Another is to use a network switch that
+  has ports that can be turned on and off remotely.
+
+  When the shared storage resource is a LUN on an SR, it is possible to
+  manipulate the LUN's mask list in order to accomplish fencing. You can
+  read about this technique in the Contributions area
+  </support/linux/contrib/>.
+
+  55..1100..  QQ:: HHooww ccaann II mmaakkee aa RRAAIIDD ooff mmoorree tthhaann 2277 ccoommppoonneennttss??
+
+  A: For Linux Software RAID, the kernel limits the number of disks in
+  one RAID to 27. However, you can easily overcome this limitation by
+  creating another level of RAID.
+
+  For example, to create a RAID 0 of thirty block devices, you may
+  create three ten-disk RAIDs (md1, md2, and md3) and then stripe across
+  them (md0 is a stripe over md1, md2, and md3).
+
+  Here is an example raidtools configuration file that implements the
+  above scenario for shelves 5, 6, and 7: multi-level RAID 0
+  configuration file <raid0-30component.conf>. Non-trivial raidtab
+  configuration files are easier to generate from a script than to
+  create by hand.
+
+  EtherDrive storage gives you a lot of freedom, so be creative.
+
+  55..1111..  QQ:: WWhhyy ddoo mmyy ddeevviiccee nnooddeess ddiissaappppeeaarr aafftteerr aa rreebboooott??
+
+  A: Some Linux distributions create device nodes dynamically. The
+  upcoming method of choice is called "udev". The aoe driver and udev
+  work together when the following rules are installed.
+
+  These rules go into a file with a name like 60-aoe.rules.  Look in
+  your udev.conf file (usually /etc/udev/udev.conf) for the line
+  starting with udev_rules= to find out where rules go (usually
+  /etc/udev/rules.d).
+
+
+
+  # These rules tell udev what device nodes to create for aoe support.
+  # They may be installed along the following lines.  Check the section
+  # 8 udev manpage to see whether your udev supports SUBSYSTEM, and
+  # whether it uses one or two equal signs for SUBSYSTEM and KERNEL.
+
+  # aoe char devices
+  SUBSYSTEM=="aoe", KERNEL=="discover",   NAME="etherd/%k", GROUP="disk", MODE="0220"
+  SUBSYSTEM=="aoe", KERNEL=="err",        NAME="etherd/%k", GROUP="disk", MODE="0440"
+  SUBSYSTEM=="aoe", KERNEL=="interfaces", NAME="etherd/%k", GROUP="disk", MODE="0220"
+  SUBSYSTEM=="aoe", KERNEL=="revalidate", NAME="etherd/%k", GROUP="disk", MODE="0220"
+  SUBSYSTEM=="aoe", KERNEL=="flush",      NAME="etherd/%k", GROUP="disk", MODE="0220"
+
+  # aoe block devices
+  KERNEL=="etherd*",       NAME="%k", GROUP="disk"
+
+
+
+  Unfortunately the syntax for the udev rules file has changed several
+  times as new versions of udev appear. You will probably have to modify
+  the example above for your system, but the existing rules and the udev
+  documentation should help you.
+
+  There is an example script in the aoe driver,
+  linux/Documentation/aoe/udev-install.sh, that can install the rules on
+  most systems.
+
+  The udev system can only work with the aoe driver if the aoe driver is
+  loaded. To avoid confusion, make sure that you load the aoe driver at
+  boot time.
+
+  55..1122..  QQ:: WWhhyy ddooeess RRAAIIDD iinniittiiaalliizzaattiioonn sseeeemm ssllooww??
+
+  A: The 2.6 Linux kernel has a problem with its RAID initialization
+  rate limiting feature. You can override this feature and speed up RAID
+  initialization by using the following commands. Note that these
+  commands change kernel memory, so the commands must be re-run after a
+  reboot.
+
+
+
+       echo 100000 > /proc/sys/dev/raid/speed_limit_max
+       echo 100000 > /proc/sys/dev/raid/speed_limit_min
+
+
+
+  55..1133..  QQ:: II ccaann oonnllyy uussee sshheellff zzeerroo!! WWhhyy wwoonn''tt ee11..99 wwoorrkk??
+
+  A: Every block device has a device file, usually in /dev, that has a
+  major and minor number. You can see these numbers using ls. Note the
+  high major numbers (1744, 2400, and 2401) in the example below.
+
+
+
+       ecashin@makki ~$ ls -l /dev/etherd/
+       total 0
+       brw-------  1 root disk 152, 1744 Mar  1 14:35 e10.9
+       brw-------  1 root disk 152, 2400 Feb 28 12:21 e15.0
+       brw-------  1 root disk 152, 2401 Feb 28 12:21 e15.0p1
+
+
+
+  The 2.6 Linux kernel allows high minor device numbers like this, but
+  until recently, 255 was the highest minor number one could use. Some
+  distributions contain userland software that cannot understand the
+  high minor numbers that 2.6 makes possible.
+
+  Here's a crude but reliable test that can determine whether your
+  system is ready to use devices with high minor numbers. In the example
+  below, we tried to create a device node with a minor number of 1744,
+  but ls shows it as 208.
+
+
+
+       root@kokone ~# mknod e10.9 b 152 1744
+       root@kokone ~# ls -l e10.9
+       brw-r--r--  1 root root 158, 208 Mar  2 15:13 e10.9
+
+
+
+  On systems like this, you can still use the aoe driver to use up to
+  256 disks if you're willing to live without support for partitions.
+  Just make sure that the device nodes and the aoe driver are both
+  created with one partition per device.
+
+  The commands below show how to create a driver without partition
+  support and then to create compatible device nodes for shelf 10.
+
+
+
+       make install AOE_PARTITIONS=1
+       rm -rf /dev/etherd
+       env n_partitions=1 aoe-mkshelf /dev/etherd 10
+
+
+
+  As of version 1.9.0, the mdadm command supports large minor device
+  numbers. The mdadm versions before 1.9.0 do not. If you would like to
+  use versions of mdadm older than 1.9.0, you can configure your driver
+  and device nodes as outlined above. Be aware that it's easy confuse
+  yourself by creating a driver that doesn't match the device nodes.
+
+  55..1144..  QQ:: HHooww ccaann II ssttaarrtt mmyy AAooEE ssttoorraaggee oonn bboooott aanndd sshhuutt iitt ddoowwnn wwhheenn
+  tthhee ssyysstteemm sshhuuttss ddoowwnn??
+
+  A: That is really a question about your own system, so it's a question
+  you, as the system administrator, are in the best position to answer.
+
+  In general, though, many Linux distributions follow the same patterns
+  when it comes to system "init scripts". Most use a System V style.
+
+  The example below should help get you started if you have never
+  created and installed an init script. Start by reading the comments at
+  the top. Make sure you understand how your system works and what the
+  script does, because every system is different.
+
+  Here is an overview of what happens when the aoe module is loaded and
+  the aoe module begins AoE device discovery. It should help you to
+  understand the example script below. Starting up the aoe module on
+  boot can be tricky if necessary parts of the system are not ready when
+  you want to use AoE.
+
+  To discover an AoE device, the aoe driver must receive a Query Config
+  reponse packet that indicates the device is available. A Coraid SR
+  broadcasts this response unsolicited when you run the online SR
+  command, but it is usually sent in response to an AoE initiator
+  broadcasting a Query Config command to discover devices on the
+  network. Once an AoE device has been discovered, the aoe driver sends
+  an ATA Device Identify command to get information about the disk
+  drive. When the disk size is known, the aoe driver will install the
+  new block device in the system.
+
+  The aoe driver will broadcast this AoE discovery command when loaded,
+  and then once a minute thereafter.
+
+  The AoE discovery that takes place on loading the aoe driver does not
+  take long, but it does take some time. That's why you'll see "sleep"
+  commands in the example aoe-init script below. If AoE discovery is
+  failing, try unloading the aoe module and tuning your init script by
+  invoking it at the command line.
+
+  You will often find that a delay is necessary after loading your
+  network drivers (and before loading the aoe driver). This delay allows
+  the network interface to initialize and to become usable. An
+  additional delay is necessary after loading the aoe driver, so that
+  AoE discovery has time to take place before any AoE storage is used.
+
+  Without such a delay, the initial AoE Config Query broadcast packet
+  might never go out onto the AoE network, and then the AoE initiator
+  will not know about any AoE targets until the next periodic Config
+  Query broadcast occurs, usually one minute later.
+
+
+
+  #! /bin/sh
+  # aoe-init - example init script for ATA over Ethernet storage
+  #
+  #   Edit this script for your purposes.  (Changing "eth1" to the
+  #   appropriate interface name, adding commands, etc.)  You might
+  #   need to tune the sleep times.
+  #
+  #   Install this script in /etc/init.d with the other init scripts.
+  #
+  #   Make it executable:
+  #     chmod 755 /etc/init.d/aoe-init
+  #
+  #   Install symlinks for boot time:
+  #     cd /etc/rc3.d && ln -s ../init.d/aoe-init S99aoe-init
+  #     cd /etc/rc5.d && ln -s ../init.d/aoe-init S99aoe-init
+  #
+  #   Install symlinks for shutdown time:
+  #     cd /etc/rc0.d && ln -s ../init.d/aoe-init K01aoe-init
+  #     cd /etc/rc1.d && ln -s ../init.d/aoe-init K01aoe-init
+  #     cd /etc/rc2.d && ln -s ../init.d/aoe-init K01aoe-init
+  #     cd /etc/rc6.d && ln -s ../init.d/aoe-init K01aoe-init
+  #
+
+  case "$1" in
+          "start")
+                  # load any needed network drivers here
+
+                  # replace "eth1" with your aoe network interface
+                  ifconfig eth1 up
+
+                  # time for network interface to come up
+                  sleep 4
+
+                  modprobe aoe
+
+                  # time for AoE discovery and udev
+                  sleep 7
+
+                  # add your raid assemble commands here
+                  # add any LVM commands if needed (e.g. vgchange)
+                  # add your filesystem mount commands here
+
+                  test -d /var/lock/subsys && touch /var/lock/subsys/aoe-init
+                  ;;
+          "stop")
+                  # add your filesystem umount commands here
+                  # deactivate LVM volume groups if needed
+                  # add your raid stop commands here
+                  rmmod aoe
+                  rm -f /var/lock/subsys/aoe-init
+                  ;;
+          *)
+                  echo "usage: `basename $0` {start|stop}" 1>&2
+                  ;;
+  esac
+
+
+
+  55..1155..  QQ:: WWhhyy ddoo II ggeett ""ppeerrmmiissssiioonn ddeenniieedd"" wwhheenn II''mm rroooott??
+
+  A: Some newer systems come with SELinux (Security-Enhanced Linux),
+  which can limit what the root user can do.
+
+  SELinux is usually good about creating entries in the system logs when
+  it prevents root from doing something, so examine your logs for such
+  messages.
+
+  Check the SELinux documentation for information on how to configure or
+  disable SELinux according to your needs.
+
+  55..1166..  QQ:: WWhhyy ddooeess ffddiisskk aasskk mmee ffoorr tthhee nnuummbbeerr ooff ccyylliinnddeerrss??
+
+  A: Your fdisk is probably asking the kernel for the size of the disk
+  with a BLKGETSIZE block device ioctl, which returns the sector count
+  of the disk in a 32-bit number. If the size of the disk exceeds the
+  ability to be stored in this 32-bit number (2 TB is the limit), the
+  ioctl returns ETOOBIG as an error. This error indicates that the
+  program should try the 64-bit ioctl (BLKGETSIZE64), but when fdisk
+  doesn't do that, it just asks the user to supply the number of
+  cylinders.
+
+  You can tell fdisk the number of cylinders yourself. The number to use
+  (sectors / (255 * 63)) is printed by the following commands. Use the
+  appropriate device instead of "e0.0".
+
+
+
+       sectors=`cat /sys/block/etherd\!e0.0/size`
+       echo $sectors 255 63 '*' / p | dc
+
+
+
+  But no MSDOS partition table can ever work with more than 2TB. The
+  reason is that the numbers in the partition table itself are only 32
+  bits in size. That means you can't have a partition larger than 2TB in
+  size or starting further than 2TB from the beginning of the device.
+
+  Some options for multi-terabyte volumes are:
+
+
+  1. By doing without partitions, the filesystem can be created directly
+     on the AoE device itself (e.g., /dev/etherd/e1.0),
+
+  2. LVM2, the Logical Volume Manager, is a sophisticated way of
+     allocating storage to create logical volumes of desired sizes, and
+
+  3. GPT partition tables.
+
+  The last item in the list above is a new kind of partition table that
+  overcomes the limitations of the older MSDOS-style partition table.
+  Andrew Chernow has related his successful experiences using GPT
+  partition tables on large AoE devices in this contributed document
+  </support/linux/contrib/chernow/gpt.html>.
+
+  Please note that some versions of the GNU parted tool, such as version
+  1.8.6, have a bug. This bug allows the user to create an MSDOS-style
+  partition table with partitions larger than two terabytes even though
+  these partitions are too large for an MSDOS partition table. The
+  result is that the filesystems on these partitions will only be usable
+  until the next reboot.
+
+  55..1177..  QQ:: CCaann II uussee AAooEE eeqquuiippmmeenntt wwiitthh OOrraaccllee ssooffttwwaarree??
+
+  A: Oracle used to have a Oracle Storage Compatibility Program
+  <http://www.oracle.com/technology/deploy/availability/htdocs/oscp.html>,
+  but simple block-level storage technologies do not require Oracle
+  validation. ATA over Ethernet provides simple, block-level storage.
+
+  Oracle used to have a list of a frequently asked questions about
+  running Oracle on Linux, but they have replaced it with documentation
+  about their own Linux distribution list covering
+  <http://www.oracle.com/technology/tech/linux/htdocs/oracleonlinux_faq.html>.
+  A third party site continues to maintain a FAQ about running Oracle on
+  Linux <http://www.orafaq.com/faqlinux.htm>.
+
+  55..1188..  QQ:: WWhhyy ddoo II hhaavvee iinntteerrmmiitttteenntt pprroobblleemmss??
+
+  A: Make sure your network is in good shape. Having good patch cables,
+  reliable network switches with good flow control, and good network
+  cards will keep your network storage happy.
+
+  55..1199..  QQ:: HHooww ccaann II aavvooiidd rruunnnniinngg oouutt ooff mmeemmoorryy wwhheenn ccooppyyiinngg llaarrggee
+  ffiilleess??
+
+  A: You can tell the Linux kernel not to wait so long before writing
+  data out to backing storage.
+
+
+
+       echo 3 > /proc/sys/vm/dirty_ratio
+       echo 4 > /proc/sys/vm/dirty_background_ratio
+       echo 32768 > /proc/sys/vm/min_free_kbytes
+
+
+
+  When a large MTU, like 9000, is in being used on the AoE-side network
+  interfaces, a larger min_free_kbytes setting could be helpful. The
+  more RAM you have, the larger the number you might have to use.
+
+  There are also alternative settings to the above "ratio" settings,
+  available as of kernel version 2.6.29. They are dirty_bytes and
+  dirty_background_bytes, and they provide finer control for systems
+  with large amounts of RAM.
+
+  If you find the /proc settings to be helpful, you can make them
+  permanent by editing /etc/sysctl.conf or by creating an init script
+  that performs the settings at boot time.
+
+  The Documentation/sysctl/vm.txt file for your kernel has details on
+  the settings available for your particular kernel, but some guiding
+  principles are...
+
+
+  +o  Linux will use free RAM to cache the data that is on AoE targets,
+     which is helpful.
+
+  +o  Writes to the AoE target go first to RAM, updating the cache. Those
+     updated parts of the cached data are "dirty" until the changes are
+     written out to the AoE target. Then they're "clean".
+
+  +o  If the system needs RAM for something else, clean parts of the
+     cache can be repurposed immediately.
+
+  +o  The RAM that is holding dirty cache data cannot be reclaimed
+     immediately, because it reflects updates to the AoE target that
+     have not yet made it to the AoE target.
+
+  +o  Systems with much RAM and doing many writes will accumulate dirty
+     data quickly.
+
+  +o  If the processes creating the write workload are forced by the
+     Linux kernel to wait for the dirty data to be flushed out to the
+     backing store (AoE targets), then I/O goes fast but the producers
+     are naturally throttled, and the system stays responsive and
+     stable.
+  +o  If the dirty data is flushed in "the background", though, then when
+     there's too much dirty data to flush out, the system becomes
+     unresponsive.
+
+  +o  Telling Linux to maintain a certain amount of truly free RAM, not
+     used for caching, allows the system to have plenty of RAM for doing
+     the work of flushing out the dirty data.
+
+  +o  Telling Linux to push dirty data out sooner keeps the backing store
+     more consistent while it is being used (with regard to the danger
+     of power failures, network failures, and the like). It also allows
+     the system to quickly reclaim memory used for caching when needed,
+     since the data is clean.
+
+  55..2200..  QQ:: WWhhyy ddooeessnn''tt tthhee aaooee ddrriivveerr nnoottiiccee tthhaatt aann AAooEE ddeevviiccee hhaass
+  ddiissaappppeeaarreedd oorr cchhaannggeedd ssiizzee??
+
+  A: Prior to the aoe6-15 driver, aoe drivers only learned an AoE
+  device's characteristics once, and the only way to use an AoE device
+  that had grown or to get rid of "phantom" AoE devices that were no
+  longer present was to re-load the aoe module completely.
+
+
+
+       rmmod aoe
+       modprobe aoe
+
+
+
+  Since aoe6-15, aoe drivers have supported the aoe-revalidate command.
+  See the aoe-revalidate manpage for more information.
+
+  55..2211..  QQ:: MMyy NNFFSS cclliieenntt hhaannggss wwhheenn II eexxppoorrtt aa ffiilleessyysstteemm oonn aann AAooEE
+  ddeevviiccee..
+
+  A: If you are exporting a filesystem over NFS, then that filesystem
+  resides on a block device. Every block device has a major and minor
+  device number that you can see by running "ls -l".
+
+  If the block device has a "high" minor number, over 255, and you're
+  trying to export a filesystem on that device, then NFS will have
+  trouble using the minor number to identify the filesystem. You can
+  tell the NFS server to use a different number by using the "fsid"
+  option in your /etc/exports file.
+
+  The fsid option is documented in the "exports" manpage. Here's an
+  example of how its use might look in /etc/exports.
+
+
+
+       /mnt/alpha 205.185.197.207(rw,sync,no_root_squash,fsid=20)
+
+
+
+  As the manpage says, each filesystem needs its own unique fsid.
+
+  55..2222..  QQ:: WWhhyy ddoo II sseeee ""uunnkknnoowwnn ppaarrttiittiioonn ttaabbllee"" eerrrroorrss iinn mmyy llooggss??
+
+  A: Those are probably not errors.  Usually this message means that
+  your disk doesn't have a partition table. With AoE devices, that's the
+  common case.
+
+  When a new block device is detected by the kernel, the kernel tries to
+  read the part of the block device where a partition table is
+  conventially stored.
+
+  The kernel checks to see whether the data there looks like any kind of
+  partition table that it knows about. It can't tell the difference
+  between a disk with a kind of partition table it doesn't know about
+  and a disk with no partition table at all.
+
+  55..2233..  QQ:: WWhhyy ddoo II ggeett bbeetttteerr tthhrroouugghhppuutt ttoo aa ffiillee oonn aann AAooEE ddeevviiccee
+  tthhaann ttoo tthhee ddeevviiccee iittsseellff??
+
+  Most of the time a filesystem resides on a block device, so that the
+  filesystem can be mounted and the storage is used by reading and
+  writing files and directories.  When you are not using a filesystem at
+  all, you might see somewhat degraded performance. Sometimes this
+  degradation comes as a surprise to new AoE users when they first try
+  out an AoE device with the dd command, for example, before creating a
+  filesystem on the device.
+
+  If the AoE device has an odd number of sectors, the block layer of the
+  Linux kernel presents the aoe driver with 512-byte I/O jobs. Each AoE
+  packet winds up with only one sector of data, doubling the number of
+  AoE packets when normal ethernet frames are in use.
+
+  The Linux kernel's block layer gives special treatment to filesystem
+  I/O, giving the aoe driver I/O jobs in the filesystem block size, so
+  there is no performance penalty to using a filesystem on an AoE device
+  that has an odd number of sectors. Since there isn't a large demand
+  for non-filesystem I/O, the complexity associated with coalescing
+  multiple I/O jobs in the aoe driver is probably not worth the
+  potential driver instability it could introduce.
+
+  One way to work around this issue is to use the O_DIRECT flag to the
+  "open" system call. For recent versions of dd, you can use the option,
+  "oflag=direct" to tell dd to use this O_DIRECT flag. You should
+  combine this option with a large blocksize, such as "bs=4M" in order
+  to take use the larger possible I/O batch size.
+
+  Another way to work around this issue is to use a trivial md device as
+  a wrapper. (Almost everyone uses a filesystem. This technique is only
+  interesting to those who are not using a filesystem, so most people
+  should ignore this idea.) In the example below, a single-disk RAID 0
+  is created for the AoE device e0.3. Although e0.3 has an odd number of
+  sectors, the md1 device does not, and tcpdump confirms that each AoE
+  packet has 1 KiB of data as we would like.
+
+
+
+       makki:~# mdadm -C -l 0 -n 1 --auto=md  /dev/md1 /dev/etherd/e0.3
+       mdadm: '1' is an unusual number of drives for an array, so it is probably
+            a mistake.  If you really mean it you will need to specify --force before
+            setting the number of drives.
+       makki:~# mdadm -C -l 0 --force -n 1 --auto=md  /dev/md1 /dev/etherd/e0.3
+       mdadm: array /dev/md1 started.
+       makki:~# cat /sys/block/etherd\!e0.3/size
+       209715201
+       makki:~# cat /sys/block/md1/size
+       209715072
+
+
+
+  55..2244..  QQ:: HHooww ccaann II bboooott ddiisskklleessss ssyysstteemmss ffrroomm mmyy CCoorraaiidd EEtthheerrDDrriivvee
+  ddeevviicceess??
+
+  Booting from AoE devices is similar to other kinds of network booting.
+  Customers have contributed examples of successful strategies in the
+  Contributions Area </support/linux/contrib/> of the Coraid website.
+
+  Jayson Vantuyl: Making A Flexible Initial Ramdisk
+  </support/linux/contrib/index.html#jvboot>
+
+  Jason McMullan: Add root filesystem on AoE support to aoe driver
+  </support/linux/contrib/index.html#jmboot>
+
+  Keep in mind that if you intend to use AoE devices before udev is
+  running, you must use static minor numbers for the device nodes. An
+  aoe6 driver version 50 or above can be instructed to use static minor
+  numbers by being loaded with the aoe_dyndevs=0 module parameter.
+  (Previous aoe drivers only used static minor device numbers.)
+
+  55..2255..  QQ:: WWhhaatt ffiilleessyysstteemmss ddoo yyoouu rreeccoommmmeenndd ffoorr vveerryy llaarrggee bblloocckk
+  ddeevviicceess??
+
+  The filesystem you choose will depend on how you want to use the
+  storage. Here are some generalizations that may serve as a starting
+  point.
+
+  There are two major classes of filesystems: cluster filesystems and
+  traditional filesystems. Cluster filesystems are more complex and
+  support simultaneous access from multiple independent computers to a
+  single filesystem stored on a shared block device.
+
+  Traditional filesystems are only mounted by one host at a time. Some
+  traditional filesystems that scale to sizes larger than those
+  supported by ext3 include the following journalling filesystems.
+
+  XFS <http://oss.sgi.com/projects/xfs/>, developed at SGI, specializes
+  in high throughput to large files.
+
+  Reiserfs <http://www.namesys.com/>, an often experimental filesystem
+  can perform well with many small files.
+
+  JFS <http://jfs.sourceforge.net/>, developed at IBM, is a general
+  purpose filesystem.
+
+  55..2266..  QQ:: WWhhyy ddooeess uummoouunntt ssaayy,, ""ddeevviiccee iiss bbuussyy""??
+
+  A: That just means you're still using the filesystem on that device.
+
+  Unless something has gone very wrong, you should be able to unmount
+  after you stop using the filesystem. Here are a few ways you might be
+  using the filesystem without knowing it:
+
+
+  +o  NFS might be exporting it. Stopping the NFS service will unuse the
+     filesystem.
+
+  +o  A process might be holding open a file on the filesystem. Killing
+     the process will unuse the filesystem.
+
+  +o  A process might have some directory on the filesystem as its
+     current working directory. In that case, you can kill the process
+     or (if it's a shell) cd to some other directory that's not on the
+     fs you're trying to unmount.
+
+  The lsof command can be helpful in finding processes that are using
+  files.
+
+  55..2277..  QQ:: HHooww ddoo II uussee tthhee mmuullttiippllee nneettwwoorrkk ppaatthh ssuuppppoorrtt iinn ddrriivveerr
+  vveerrssiioonnss 3333 aanndd uupp??
+
+
+  A: You don't have to do anything to benefit from the aoe driver's
+  ability to use multiple network paths to the same AoE target.
+
+  The aoe driver will automatically use each end-to-end path in an
+  essentially round-robin fashion. If one network path becomes unusable,
+  the aoe driver will attempt to use the remaining network paths to
+  reach the AoE target, even retransmitting any lost packets through one
+  of the remaining paths.
+
+  55..2288..  QQ:: WWhhyy ddooeess ""xxffss__cchheecckk"" ssaayy ""oouutt ooff mmeemmoorryy""??
+
+  A: The xfstools use a huge amount of virtual memory when operating on
+  large filesystems. The CLN HOWTO has some helpful information about
+  using temporary swap space when necessary for accomodating the
+  xfstools' virtual memory requirements.
+
+  CLN HOWTO: Repairing a Filesystem </support/cln/CLN-
+  HOWTO/ar01s05.html#id2515012>
+
+  The 32-bit xfstools are limited in the size of the filesystem they can
+  operate on, but 64-bit systems overcome this limitation. This limit is
+  likely to be encountered with 32-bit xfstools for filesystems over 2
+  TiB in size.
+
+  55..2299..  QQ:: CCaann vviirrttuuaall mmaacchhiinneess rruunnnniinngg oonn VVMMwwaarree EESSXX uussee AAooEE oovveerr
+  jjuummbboo ffrraammeess??
+
+  A: It is somewhat difficult to find public information about the ESX
+  configuration necessary to use jumbo frames, but there is information
+  in the public forum at the URL below.
+
+  How to setup TCP/IP Jumbo packet support in VMware ESX 3.5 on W2K3 VMs
+  <http://communities.vmware.com/thread/135691>
+
+  55..3300..  QQ:: CCaann II uussee SSMMAARRTT wwiitthh mmyy AAooEE ddeevviicceess??
+
+  A: The early Coraid products like the EtherDrive PATA blades simply
+  passed ATA commands through to the attached PATA disk, including SMART
+  commands. While there was no way to ask the aoe driver to send SMART
+  commands, one could ask aoeping to send SMART commands.  The aoeping
+  manpage has more information.
+
+  The Coraid SR and VS storage appliances present AoE targets that are
+  LUNs, not corresponding to a specific disk. The SR supports SMART
+  internally, on its command line, but the AoE LUNs do not support
+  SMART.
+
+  66..  JJuummbboo FFrraammeess
+
+  Data is transmitted over the ethernet in frames, usually with a
+  maximum frame size of 1500. Receiving or transmitting a frame of data
+  takes time, and by increasing the amount of data per frame, data can
+  often be transmitted more efficiently over an ethernet network.
+
+  Frames larger than 1500 octets are called "jumbo frames." There is
+  plenty of information about jumbo frames out there, so in this section
+  we're going to focus on how jumbo frames relate to the use of AoE.
+
+  When you change the MTU on your Linux host's network interface, the
+  interface must essentially reboot itself. Once this has completed and
+  the interface is back up, you should run the aoe-discover command to
+  trigger the reevaluation of the aoe device's jumbo frame capability.
+  You should see lines in your log (or in the output of the dmesg
+  command) indicating that the outstanding frame size has changed. The
+  example text below appears after setting the MTU on eth1 to 4200,
+  enough for 4 KiB of data, plus headers.
+       aoe: e7.0: setting 4096 byte data frames on eth1:003048865ed2
+
+
+
+  If you do not see this output, try running aoe-revalidate on the
+  device in question. If you have a switch inbetween your SR and your
+  linux client that does not have jumbo frames enabled, the aoe driver
+  will fall back to 1 KiB of data per packet until a forced revalidation
+  occurs.
+
+  For larger frames to be used, the whole network path must support
+  them. For example, consider a scenario where you are using ...
+
+
+  1. a LUN from a Coraid SR1521 as your AoE target,
+
+  2. a Linux host with an Intel gigabit NIC as your AoE initiator, and
+
+  3. a gigabit switch between the target and initiator.
+
+  In that case, all three points on the network must be configured to
+  handle large frames in order for AoE data to be transmitted in jumbo
+  frames.
+
+  66..11..  LLiinnuuxx NNIICC MMTTUU
+
+  Check the documentation for your network card's driver to find out how
+  to change its maximum transmission unit (MTU). For example, if you
+  have a gigabit Intel NIC, you can read the
+  Documentation/networking/e1000.txt file in the kernel sources to find
+  out that the following command increases the MTU to 4200.
+
+
+
+       ifconfig ethx mtu 4200 up
+
+
+
+  The real name of your interface (e.g., "eth1") should be used instead
+  of "ethx".
+
+  66..22..  NNeettwwoorrkk SSwwiittcchh MMTTUU
+
+  Usually you have to turn on jumbo frames in a switch that supports
+  them. Doing jumbo frames requires a different buffer allocation in the
+  switch that's not usually sensible for ethernet with standard frames.
+  Check the documentation for your switch for details.
+
+  66..33..  SSRR MMTTUU
+
+  No special configuration steps need to be taken on the Coraid
+  SATA+RAID unit for it to use jumbo frames if the firmware release is
+  20060316 or newer.
+
+  You can see what firmware release your SR is running by issuing the
+  "release" command at its command line.
+
+  77..  AAppppeennddiixx AA:: AArrcchhiivveess
+
+  This section contains material that is no longer relevant to a
+  majority of readers. It has been placed in this appendix with minimal
+  editing.
+
+
+  77..11..  EExxaammppllee:: RRAAIIDD 55 wwiitthh tthhee rraaiiddttoooollss
+
+  Let us assume we have five AoE targets that are virtual LUNs numbered
+  0 through 4, exported from a Coraid VS appliance that has been
+  assigned shelf address 0. Let us further assume we want to use these
+  five LUNs to create a level-5 RAID array. Using a text editor, we
+  create a Software RAID configuration file named "/etc/rt". The
+  transcript below shows its contents.
+
+
+
+       $ cat /etc/rt
+       raiddev /dev/md0
+               raid-level      5
+               nr-raid-disks   5
+               chunk-size      32
+               persistent-superblock 1
+               device          /dev/etherd/e0.0
+               raid-disk       0
+               device          /dev/etherd/e0.1
+               raid-disk       1
+               device          /dev/etherd/e0.2
+               raid-disk       2
+               device          /dev/etherd/e0.3
+               raid-disk       3
+               device          /dev/etherd/e0.4
+               raid-disk       4
+
+
+
+  Here is an example for setting up and using the RAID array described
+  by the above configuration file, /etc/rt.
+
+
+
+       $ mkraid -c /etc/rt /dev/md0
+       DESTROYING the contents of /dev/md0 in 5 seconds, Ctrl-C if unsure!
+       handling MD device /dev/md0
+       analyzing super-block
+       disk 0: /dev/etherd/00:00, 19535040kB, raid superblock at 19534976kB
+       disk 1: /dev/etherd/00:01, 19535040kB, raid superblock at 19534976kB
+       disk 2: /dev/etherd/00:02, 19535040kB, raid superblock at 19534976kB
+       disk 3: /dev/etherd/00:03, 19535040kB, raid superblock at 19534976kB
+       disk 4: /dev/etherd/00:04, 19535040kB, raid superblock at 19534976kB
+       $
+
+
+
+  To make an ext3 filesystem on the RAID array and mount it, the
+  following commands can be issued:
+
+
+
+       $ mkfs.ext3 /dev/md0
+       ... (mkfs output)
+       $ mount /dev/md0 /mnt/raid
+       $
+
+
+
+  The resulting storage is single-fault tolerant. Add hot spares to make
+  the array even more robust (see the Software RAID documentation for
+  more information.) Remember that it takes the md driver some time to
+  initialize a new RAID 5 array. During that time, you can use the
+  device, but performance is sub-optimal until md finishes. Check
+  /proc/mdstat for information on the initialization's progress.
+
+  77..22..  EExxaammppllee:: RRAAIIDD 1100 wwiitthh mmddaaddmm
+
+  Today, the Linux kernel supports a raid10 personality, and you can
+  create a RAID 10 with one mdadm command. Things used to be more
+  complicated. The section below shows the steps that used to be
+  necessary to create a RAID 10 by first creating several RAID 1 mirrors
+  that could serve as components for the larger RAID 0.
+
+  RAID 10 is striping over mirrors. That is, a RAID 0 is created to
+  stripe data over several RAID 1 devices. Each RAID 1 is a mirrored
+  pair of disks. For a given (even) number of disks, a RAID 10 has less
+  capacity and throughput than a RAID 5. Nevertheless, storage experts
+  often prefer RAID 10 for its superior resiliancy to failure, its low
+  re-initialization time, and its low computational overhead.
+
+  The first example shows how to create a RAID 10 and a hot spare from
+  eight AoE targets that share shelf address 1. After checking the mdadm
+  manpage, it should be easy for you to create startup and shutdown
+  scripts.
+
+
+
+       # make-raid10.sh
+       # create a RAID 10 from shelf 1 to be used with mdadm-aoe.conf
+
+       set -xe         # shell flags: be verbose, exits on errors
+       shelf=1
+
+       # create the mirrors
+       mdadm -C /dev/md1 -l 1 -n 2 /dev/etherd/e$shelf.0 /dev/etherd/e$shelf.1
+       mdadm -C /dev/md2 -l 1 -n 2 /dev/etherd/e$shelf.2 /dev/etherd/e$shelf.3
+       mdadm -C /dev/md3 -l 1 -n 2 /dev/etherd/e$shelf.4 /dev/etherd/e$shelf.5
+       mdadm -C /dev/md4 -l 1 -n 2 -x 2 /dev/etherd/e$shelf.6 /dev/etherd/e$shelf.7 \
+               /dev/etherd/e$shelf.8
+       sleep 1
+       # create the stripe over the mirrors
+       mdadm -C /dev/md0 -l 0 -n 4 /dev/md1 /dev/md2 /dev/md3 /dev/md4
+
+
+
+  Notice that the make-raid10.sh script above sets up md4 with the hot
+  spare drive. What if one of the drives in md1 fails? The "spare group"
+  mdadm feature allows an mdadm process running in monitor mode to
+  dynamically allocate hot spares as needed, so that the single hot
+  spare can replace a faulty disk in any RAID 1 of the four.
+
+  The configuration file below tells the mdadm monitor process that it
+  can use the hot spare to replace any drive in the RAID 10.
+
+
+
+  # mdadm-aoe.conf
+  # see mdadm.conf manpage for syntax and info
+  #
+  # There's a "spare group" called e1, after the shelf
+  # with address 1, so that mdadm can use hot spares for
+  # any RAID 1 in the RAID 10 on shelf 1.
+  #
+
+  DEVICE /dev/etherd/e1.[0-9]
+
+  ARRAY /dev/md1
+    devices=/dev/etherd/e1.0,/dev/etherd/e1.1
+    spare-group=e1
+  ARRAY /dev/md2
+    devices=/dev/etherd/e1.2,/dev/etherd/e1.3
+    spare-group=e1
+  ARRAY /dev/md3
+    devices=/dev/etherd/e1.4,/dev/etherd/e1.5
+    spare-group=e1
+  ARRAY /dev/md4
+    devices=/dev/etherd/e1.6,/dev/etherd/e1.7,/dev/etherd/e1.8
+    spare-group=e1
+
+  ARRAY /dev/md0
+    devices=/dev/md1,/dev/md2,/dev/md3,/dev/md4
+
+  MAILADDR root
+
+  # This is normally a program that handles events instead
+  # of just /bin/echo.  If you run the mdadm monitor in the
+  # forground, though, using echo allows you to see what events
+  # are occurring.
+  #
+  PROGRAM /bin/echo
+
+
+
+  77..33..  IImmppoorrttaanntt nnootteess
+
+
+  1. You may note above that the example creates the RAID device
+     configuration file as /etc/rt rather than the conventional
+     /etc/raidtab. The kernel uses the existence of /etc/raidtab to
+     trigger starting the RAID device on boot before any other
+     initializations are performed. This is done to permit users the
+     ability to use a Software RAID device for their root filesystem.
+     Unfortunately, because the kernel has not yet initialized the
+     network it is unable to access the EtherDrive storage at this point
+     and the kernel hangs. The workaround for this is to place
+     EtherDrive-based RAID configurations in another file such as
+     /etc/rt and add calls in an rc.local file similar to the following
+     for startup on boot:
+
+
+
+       raidstart -c /etc/rt /dev/md0
+       mount /dev/md0 /mnt/raid
+
+
+
+  77..44..  OOlldd FFAAQQ LLiisstt
+
+  These questions are no longer frequently asked, probably because they
+  relate to software that is no longer widely used.
+
+  77..44..11..  QQ:: WWhheenn II ""mmooddpprroobbee aaooee"",, iitt ttaakkeess aa lloonngg ttiimmee.. TThhee ssyysstteemm
+  sseeeemmss ttoo hhaanngg.. WWhhaatt ccoouulldd bbee tthhee pprroobblleemm??
+
+  A: When the hotplug service was first making its way into Linux
+  distributions, it could slow things down and cause problems when the
+  aoe module loaded. For some systems, it is may be easiest to disable
+  it on your system. Usually the right commands look like this:
+
+
+
+       chkconfig hotplug off
+       /etc/init.d/hotplug stop
+
+
+
+  More recent distributions may need hotplug working in conjunction with
+  udev. See the udev question in this FAQ for more information.
+
+
+

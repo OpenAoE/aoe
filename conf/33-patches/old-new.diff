@@ -1,0 +1,13 @@
+diff --git a/linux/drivers/block/aoe/aoeblk.c b/linux/drivers/block/aoe/aoeblk.c
+index 426537f..fdb2082 100644
+--- a/linux/drivers/block/aoe/aoeblk.c
++++ b/linux/drivers/block/aoe/aoeblk.c
+@@ -378,7 +378,7 @@ gderr:		spin_lock_irqsave(&d->lock, flags);
+ 	q->queuedata = d;
+ 	d->gd = gd;
+ 	if (aoe_maxsectors)
+-		blk_queue_max_sectors(q, aoe_maxsectors);
++		blk_queue_max_hw_sectors(q, aoe_maxsectors);
+ 	gd->major = AOE_MAJOR;
+ 	gd->first_minor = d->sysminor;
+ 	gd->fops = &aoe_bdops;

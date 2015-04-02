@@ -1,0 +1,13 @@
+To fit in with the upstream kernel, we have to use code that fits
+current usage patterns, which sometimes means adjusting the aoe code
+to fit older kernels.
+
+The IS_ERR_OR_NULL helper was added in 2.6.33 by Phil Carmody.
+  
+  commit 603c4ba96be998a8dd7a6f9b23681c49acdf4b64
+  Author: Phil Carmody <ext-phil.2.carmody@nokia.com>
+  Date:   Mon Dec 14 18:00:29 2009 -0800
+  
+      err.h: add helper function to simplify pointer error checking
+     
+Older kernels need help.

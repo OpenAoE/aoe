@@ -1,0 +1,18 @@
+There seems to be a trend where a nice, general and symmetrical user
+interfaces in the kernel will be made less capable by the removal of
+unused parts, just because no in-kernel code is using the interface to
+its full potential yet.
+
+If we could get changes into the kernel more quickly, then we wouldn't
+have the rug pulled out from under us (I hope).
+
+commit 5705f7021748a69d84d6567e68e8851dab551464
+Author: NeilBrown <neilb@suse.de>
+Date:   Tue Sep 25 12:35:59 2007 +0200
+
+    Introduce rq_for_each_segment replacing rq_for_each_bio
+    
+    Every usage of rq_for_each_bio wraps a usage of
+    bio_for_each_segment, so these can be combined into
+    rq_for_each_segment.
+    

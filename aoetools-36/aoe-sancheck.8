@@ -1,0 +1,61 @@
+.TH aoe-sancheck 8
+.SH NAME
+aoe-sancheck \- verify storage network capabilities
+.SH SYNOPSIS
+.nf
+.B aoe-sancheck [\-v]
+.fi
+.SH DESCRIPTION
+The
+.I aoe-sancheck
+command collects information about the local interfaces and probes the network for ATA over Ethernet devices, validating the paths for each device. It does not use the aoe kernel module but rather the bpf interface to evaluate the network.  As such, the aoe module does not need to be loaded to perform the test.
+.PP
+The output of the command is divided into two sections: information about the local interfaces followed by a list of detected AoE devices.  The first section displays the local interfaces, if the interface is up or down, its configured MTU, and the PCI ID for the interface.
+.PP
+The second section lists detected AoE devices, one per line, with the following information:
+.TP
+.BI Device
+The device name of the form
+.I eX.Y
+where
+.I X
+is the AoE device shelf address, and
+.I Y
+is the AoE device slot address.
+.TP
+.BI Macs
+The number of mac addresses detected for this device.
+.TP
+.BI Payload
+The number of bytes of data the device can handle in a single AoE request. This number does not represent the total frame size as it does not include bytes from ethernet or AoE headers.
+.TP
+.BI "Local Interfaces"
+The list of local interfaces from which the device is visible.
+.SS Options
+.TP
+\fB\-v\fP 
+Prints out additional raw information.
+.SH DIAGNOSIS
+For each device, 
+.I aoe-sancheck
+may print out additional lines of suggestions or warnings.  The following checks are made:
+.TP
+.BI "The MTU of the local interfaces is set high enough to handle the AoE device's reported payload. " 
+Depending on the host NIC's capabilities and storage network switch's capabilities, best performance may or may not be with local interface MTU set higher than a device's payload size.
+.TP
+.BI "The number of local interfaces matches the number of interfaces on the device. " 
+Best performance comes from having a host and device with comparable bandwidth. \fIAoe-sancheck\fP simply counts the number of interfaces involved and does not figure link bandwidth in its comparison. 
+.TP
+.BI "All local interfaces for an AoE device have the same MTU."  
+If one interface for a device has a smaller MTU than the others, the AoE driver must use the smaller payload size for all interfaces.
+.TP
+.BI "Each path to the device is capable of the configured payload size."  
+This check detects the situation where a local interface is configured for jumbo frames and the AoE device is capable of jumbo frames, but some aspect of the network is incapable of passing frames that size, for example, a misconfigured switch.  \fIAoe-sancheck\fP reports the maximum payload size the path is capable of if less than the configured payload size.
+.SH BUGS
+The program may sometimes display inconsistent results between runs showing that a path is capable of a smaller frame size than it actually is.  If you see this behavior, please email one of the authors with your verbose output.
+.SH "SEE ALSO"
+.IR aoeping (8),
+.IR aoetools (8)
+.SH AUTHORS
+Justin Sanders (justin@coraid.com),
+Sam Hopkins (sah@coraid.com)

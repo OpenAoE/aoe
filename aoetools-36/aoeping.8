@@ -1,0 +1,180 @@
+.TH aoeping 8
+.SH NAME
+aoeping \- simple communication with AoE device
+.SH SYNOPSIS
+.B aoeping [options] {shelf} {slot} {netif}
+.fi
+.SH DESCRIPTION
+The
+.IR aoeping (8)
+program performs simple one or two-round-trip communication with an
+ATA over Ethernet (AoE) device.  It creates and receives AoE packets
+directly, using raw network sockets.
+.PP
+Running
+.IR aoeping (8)
+without command line arguments will result in a 
+short usage summary being displayed.
+.PP
+The
+.IR aoeping (8)
+program will wait forever if it doesn't receive
+an expected response.  The caller should use a time out to catch
+this situation.
+.SS Arguments
+.TP
+\fBshelf\fP
+This should be the shelf address (major AoE address) of the AoE device
+to communicate with.
+.TP
+\fBslot\fP
+This should be the slot address (minor AoE address) of the AoE device
+to communicate with.
+.TP
+\fBnetif\fP
+The name of the ethernet network interface to use for AoE
+communications, e.g., eth1.
+.SS Options
+.TP
+\fB-i\fP
+Issue an ATA "identify device" command after receiving the AoE
+device's Config
+Query response.  The "ident" response will be printed on standard
+output as a hexidecimal dump.
+.TP
+\fB-I\fP
+Issue an ATA "identify device" command after receiving the AoE
+device's Config
+Query response.  The "ident" response will be pretty-printed on standard
+output as selected human-readable fields.
+.TP
+\fB-v\fP
+Turn on 
+more copious output, including a hexidecimal dump of the Config Query
+response from the AoE device (see AoE spec at URL below).
+.TP
+\fB-s\fP
+This option takes an argument.  The
+argument is a decimal integer that specifies the number of seconds
+that
+.IR aoeping (8)
+will wait for a response before timing out and
+exiting with a non-zero status.
+.TP
+\fB-S\fP
+This option takes an argument.  The
+argument is the name of a SMART command to send to the disk.  The
+SMART commands in the list below are supported.  If the command
+requires data 
+transfer, one sector (512 bytes) of data is always the amount
+transfered.  If the command takes a parameter (for the Low LBA
+register), then the name of the SMART command is immediately followed
+by a colon and then a number, the value of the parameter, e.g., "-S
+read_log:1".
+.IP
+  read_data
+  offline_immediate
+  read_log
+  write_log
+  enable
+  disable
+  return_status
+
+For \fBwrite_log\fP,
+.IR aoeping (8)
+reads from
+standard input the one sector of data to be
+written to the specified log.
+
+If the AoE device does not support SMART commands or if the command is
+aborted, an error message
+is printed to standard error and
+.IR aoeping (8)
+exits with a non-zero status.  A command may be aborted if SMART is
+disabled on the device.
+
+The
+.IR aoeping (8)
+command just sends and receives SMART commands, without
+interpreting them.  See the ATA specification for more information on
+using SMART.
+.LP
+.TP
+\fB-t\fP
+(This is an advanced feature.)  This option has an argument.  The
+argument is a decimal integer that is used as the initial tag, with
+the highest bit set, as 
+the 
+first tag in ATA commands.  Tags for subsequent ATA commands will be
+incremented by one.
+.TP
+\fB-h\fP
+Show a usage summary.
+.SH EXAMPLE
+In this example, the root user
+uses
+.IR aoeping (8)
+to check for the presence of aoe device e10.9 on
+network interface eth0.
+.IP
+.EX
+.nf
+bash# aoeping -v 10 9 eth0 | head
+tag: 80000000
+eth: eth0
+shelf: 10
+slot: 9
+config query response:
+00 0d 87 aa c9 00 00 10 04 00 11 1f 88 a2 18 00 
+00 0a 09 01 00 00 00 00 00 03 30 08 00 10 00 04 
+66 6f 6f 0a 00 ff ff ff ff ff ff ff ff ff ff ff 
+ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 
+ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 
+.fi
+.EE
+.LP
+The next example shows root making sure the disk on the e10.9 is still
+responsive by issuing an ATA device identify command with a 20-second
+timeout. 
+.IP
+.EX
+.nf
+bash# aoeping -i -s 20 \\
+  10 9 eth0 > /dev/null \\
+  && echo ok
+ok
+.fi
+.EE
+.LP
+The next example uses SMART to determine whether the disk on e10.9
+thinks it 
+has exceeded its error threshold.  The ATA spec says that the LBA Mid
+register will be 0x4f when the disk has not exceeded its error
+threshold.
+.IP
+.EX
+.nf
+bash# aoeping -S return_status \\
+  10 9 eth0 | grep 'LBA Mid: 0x4f' \\
+  > /dev/null \\
+  && echo ok
+ok
+.fi
+.EE
+.LP
+Note that in a script, it would be prudent to specify and handle a
+timeout.  Also, a good script would make sure the
+\fBStatus\fP register does not have the error bit (bit zero) or the
+device fault bit (bit 5) set.
+.SH "SEE ALSO"
+.IR aoe-discover (8),
+.IR aoe-interfaces (8),
+.IR aoe-mkdevs (8),
+.IR aoe-mkshelf (8),
+.IR aoe-stat (8),
+
+\fIAoE (ATA over Ethernet)\fP: http://support.coraid.com/documents/AoEr10.txt,
+
+\fIATA specification\fP
+.SH AUTHOR
+Ed L. Cashin (ecashin@coraid.com)

@@ -1,0 +1,58 @@
+The aoetools are programs that assist in using ATA over Ethernet on
+systems with version 2.6 and newer Linux kernels.  
+
+Systems running 2.4 Linux kernels do not need and should not install
+the aoetools.  The aoe driver for 2.4 kernels is self sufficient.
+
+Please see the aoetools manpage for a brief list of the tools.
+
+--------------------------------------------------------------------
+AOE DRIVER COMPATIBILITY
+
+  If you are using udev on your system, the aoe-mkdevs and aoe-mkshelf
+  should not be used.  Just let udev create device nodes for you.  If
+  you need to configure udev, its manpages, in conjunction with the
+  example in the EtherDrive HOWTO FAQ, should help.
+
+  If you are not using udev, it is important to ensure that the device
+  nodes in /dev/etherd match the aoe driver.  Please see devnodes.txt
+  for information.
+
+--------------------------------------------------------------------
+BUILDING THE AOETOOLS
+
+If you need to configure the software, look at the variables at the
+top of the Makefile.  The defaults should work for most people.  When
+using the defaults there's only one step to configure and install the
+aoetools software and documentation:
+
+  make install
+
+You'll need sufficient permissions to install in the default locations
+if you haven't overridden them with your own locations.
+
+The aoe-sancheck tool depends on libpthread.  If its header and
+library files are not present, the aoetools makefile skips
+aoe-sancheck.  You can install your Linux distribution's "libpthread"
+and "libpthread-devel" packages (They might be called something
+slightly different) to help aoe-sancheck to build successfully.
+
+--------------------------------------------------------------------
+LEGACY TOOLS
+
+These two are legacy commands for systems without udev.
+
+  aoe-mkdevs		create character and block device files
+  aoe-mkshelf		create block device files for one shelf address
+
+--------------------------------------------------------------------
+RESOURCES
+
+The aoetools homepage
+  http://aoetools.sourceforge.net/
+
+The CORAID homepage
+  http://www.coraid.com/
+
+The Linux Support Page at CORAID
+  http://support.coraid.com/support/linux/

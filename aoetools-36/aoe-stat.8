@@ -1,0 +1,116 @@
+.TH aoe-stat 8
+.SH NAME
+aoe-stat \- print aoe device status report
+.SH SYNOPSIS
+.nf
+.B modprobe aoe
+.B aoe-stat
+.B env sysfs_dir=/sys aoe-stat
+.fi
+.SH DESCRIPTION
+The
+.I aoe-stat
+script collects information on ATA over Ethernet devices from sysfs.
+.PP
+For each AoE device the kernel has discovered, there is one row in the
+script's output.  Each row has
+the following columns.
+.TP
+.BI devicename
+The device name is of the form 
+.I eX.Y,
+ with 
+.I X
+being the AoE device shelf address, and 
+.I Y 
+being the AoE slot address.
+.TP
+.BI size
+The size of the AoE device is in gigabytes (billions of bytes).
+.TP
+.BI ifname
+The network interface name is printed in the third column.
+.TP
+.BI payload
+The number of bytes read from or written to the storage target in
+each AoE packet appears in the fourth column, unless the aoe driver
+does not export this information.
+.TP
+.BI status
+The device status is in the last column.  Possible values
+are \fI up\fR, \fI down\fR, 
+and \fI down,closewait\fR.  The "up" status means the aoe driver
+considers this device ready 
+for I/O.  The "down" status means the opposite.  The "down,closewait"
+status means that some software still has the device open, and when
+this straggler closes the device, it will enter the "down" state.
+.SH UNAVAILABLE TARGETS
+If a discovered AoE target will not respond to I/O commands, some
+of the information needed to allow Linux to use the device is not
+available.  The
+.I aoe-stat
+command shows the missing information as "(NA)" fields.
+.PP
+It is normal for "(NA)" fields to appear during the brief
+time between the time that an AoE target is detected and the
+time the Linux kernel finishes reading its partition table.
+.SH ENVIRONMENT VARIABLES
+If the
+.I sysfs_dir
+variable is set in the environment, it will override the default
+location where 
+.I aoe-stat
+will look for 
+sysfs, namely \fI /sys\fR.
+.SH WARNINGS
+If the minor device number of a device node does not match that of its
+namesake, \fIaoe-stat\fP will print a warning as shown below.
+.IP
+.EX
+.nf
+nai:~# aoe-stat
+      e0.3         0.104GB   eth0 up            
+      e0.4      4398.046GB   eth0 up            
+     e20.0      1000.215GB   eth0 up            
+     e42.0      2000.431GB   eth0 up            
+aoe-stat Warning: device node /dev/etherd/e45.1 has wrong minor device number
+     e45.1      1152.874GB   eth0 up            
+.fi
+.EE
+.PP
+Using such a device node is dangerous, because its name doesn't match
+the actual device that you would be reading from and writing to.  Such
+a broken device node should be removed.  Device nodes are created by
+\fIudev\fP or (on systems without \fIudev\fP) by \fIaoe-mkdevs\fP.
+.SH EXAMPLE
+In this example, the root user on a host named
+.I nai
+loads the aoe driver module and then prints a list of all the
+available aoe devices.  Then he remembers to bring up the storage
+network interfaces, does an AoE discovery, and prints the list again.
+This time the list shows all the devices in shelf seven.
+.IP
+.EX
+.nf
+nai:~# modprobe aoe
+nai:~# aoe-stat
+nai:~# ifconfig eth3 up
+nai:~# aoe-discover 
+nai:~# aoe-stat
+      e0.0     10995.116GB   eth3 up            
+      e0.1     10995.116GB   eth3 up            
+      e0.2     10995.116GB   eth3 up            
+      e1.0      1152.874GB   eth3 up            
+      e7.0       370.566GB   eth3 up            
+nai:~# 
+.fi
+.EE
+.SH "SEE ALSO"
+.IR aoe-discover (8),
+.IR aoe-interfaces (8),
+.IR aoe-mkdevs (8),
+.IR aoe-mkshelf (8),
+.IR aoetools (8),
+.IR udev (7).
+.SH AUTHOR
+Ed L. Cashin (ecashin@coraid.com)

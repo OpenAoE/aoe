@@ -1,0 +1,9 @@
+v2.6.34-rc4 contains commit ee714f2dd33e, where Martin K. Petersen
+removes a compatibility wrapper that equates blk_queue_max_sectors
+with blk_queue_max_hw_sectors.
+
+v2.6.34-rc1 contains commit 086fa5ff, where he renames
+blk_queue_max_sectors to blk_queue_max_hw_sectors, to bring it in line
+with a convention that applies to newer members of the block queue
+limits, thus making it clear that the function updates max_hw_sectors.
+

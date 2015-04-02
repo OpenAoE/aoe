@@ -1,0 +1,8 @@
+#! /bin/sh
+
+if test "`ps axwwww | grep 'udev[d]'`" || test -d "/dev/.udev"; then
+	# aoe_dyndevs=1 when udev is present
+	echo 1
+else
+	echo 0
+fi

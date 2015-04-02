@@ -1,0 +1,9 @@
+Upstream, aoechr_error was modified with the commit shown below to use
+the kmemdup function.  Alexey Dobriyan added kmemdup with commit
+1a2f67b4, appearing in 2.6.19.
+
+    commit 60abc786dd3b5d6917d63fd789c9fed772f65039
+    Author: Mihnea Dobrescu-Balaur <mihneadb@gmail.com>
+    Date:   Tue Apr 30 15:28:29 2013 -0700
+    
+        aoe: replace kmalloc and then memcpy with kmemdup

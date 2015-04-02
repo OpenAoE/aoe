@@ -1,0 +1,36 @@
+--- aoe6-stand/linux/drivers/block/aoe/aoecmd.c.20070815	2007-08-15 17:29:30.000000000 -0400
++++ aoe6-stand/linux/drivers/block/aoe/aoecmd.c	2007-08-15 16:01:53.000000000 -0400
+@@ -37,22 +37,6 @@ static struct {
+ 	spinlock_t lock;
+ } iocq;
+ 
+-static void
+-skb_reset_network_header(struct sk_buff *skb)
+-{
+-	skb->nh.raw = skb->data;
+-}
+-static void
+-skb_reset_mac_header(struct sk_buff *skb)
+-{
+-	skb->mac.raw = skb->data;
+-}
+-void *
+-skb_mac_header(struct sk_buff *skb)
+-{
+-	return skb->mac.raw;
+-}
+-
+ static struct sk_buff *
+ new_skb(ulong len)
+ {
+--- aoe6-83+/linux/drivers/block/aoe/aoenet.c	2013-05-30 14:20:22.000000000 -0400
++++ aoe6-83+/linux/drivers/block/aoe/aoenet.c.orig	2013-05-30 14:28:23.000000000 -0400
+@@ -49,8 +49,6 @@
+ static spinlock_t txlock;
+ static struct sk_buff_head skbtxq;
+ 
+-void *skb_mac_header(struct sk_buff *skb);
+-
+ /* enters with txlock held */
+ static int
+ tx(int id)

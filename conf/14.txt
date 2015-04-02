@@ -1,0 +1,16 @@
+Kernels 2.6.15 and older only have one parameter to
+end_that_request_last.
+
+commit 8ffdc6550c47f75ca4e6c9f30a2a89063e035cf2
+Author: Tejun Heo <htejun@gmail.com>
+Date:   Fri Jan 6 09:49:03 2006 +0100
+
+    [BLOCK] add @uptodate to end_that_request_last() and @error to rq_end_io_fn()
+    
+    add @uptodate argument to end_that_request_last() and @error
+    to rq_end_io_fn().  there's no generic way to pass error code
+    to request completion function, making generic error handling
+    of non-fs request difficult (rq->errors is driver-specific and
+    each driver uses it differently).  this patch adds @uptodate
+    to end_that_request_last() and @error to rq_end_io_fn().
+    

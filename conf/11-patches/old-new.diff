@@ -1,0 +1,12 @@
+diff -uprN a/linux/drivers/block/aoe/aoeblk.c b/linux/drivers/block/aoe/aoeblk.c
+--- a/linux/drivers/block/aoe/aoeblk.c	2013-06-19 01:20:03.000000000 -0400
++++ b/linux/drivers/block/aoe/aoeblk.c	2013-06-19 01:15:39.000000000 -0400
+@@ -17,7 +17,7 @@
+ #include "aoe.h"
+ #include "disk_attr.h"
+ 
+-static kmem_cache_t *buf_pool_cache;
++static struct kmem_cache *buf_pool_cache;
+ static struct dentry *aoe_debugfs_dir;
+ 
+ /* GPFS needs a larger value than the default. */

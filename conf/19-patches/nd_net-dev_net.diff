@@ -1,0 +1,12 @@
+diff -upr nd_net/linux/drivers/block/aoe/aoenet.c dev_net/linux/drivers/block/aoe/aoenet.c
+--- nd_net/linux/drivers/block/aoe/aoenet.c	2008-08-19 13:27:26.000000000 -0400
++++ dev_net/linux/drivers/block/aoe/aoenet.c	2008-08-19 11:29:29.000000000 -0400
+@@ -169,7 +169,7 @@ aoenet_rcv(struct sk_buff *skb, struct n
+ 	u32 n;
+ 	int sn;
+ 
+-	if (ifp->nd_net != &init_net)
++	if (dev_net(ifp) != &init_net)
+ 		goto exit;
+ 
+ 	skb = skb_share_check(skb, GFP_ATOMIC);

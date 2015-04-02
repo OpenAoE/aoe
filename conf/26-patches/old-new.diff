@@ -1,0 +1,22 @@
+diff -upr old/linux/drivers/block/aoe/aoecmd.c new/linux/drivers/block/aoe/aoecmd.c
+--- old/linux/drivers/block/aoe/aoecmd.c	2008-12-02 13:45:25.000000000 -0500
++++ new/linux/drivers/block/aoe/aoecmd.c	2008-12-02 10:03:07.000000000 -0500
+@@ -654,18 +654,6 @@ rto(struct aoedev *d)
+ 	return t;
+ }
+ 
+-/* list_replace appears in 2.6.18
+- * The implementation is copied here for older kernels.
+- */
+-static inline void list_replace(struct list_head *old,
+-                               struct list_head *new)
+-{
+-       new->next = old->next;
+-       new->next->prev = new;
+-       new->prev = old->prev;
+-       new->prev->next = new;
+-}
+-
+ static void
+ rexmit_deferred(struct aoedev *d)
+ {

@@ -1,0 +1,16 @@
+diff -upr old/linux/drivers/block/aoe/aoeblk.c new/linux/drivers/block/aoe/aoeblk.c
+--- old/linux/drivers/block/aoe/aoeblk.c	2013-06-22 18:32:30.000000000 -0400
++++ new/linux/drivers/block/aoe/aoeblk.c	2013-06-22 18:26:20.000000000 -0400
+@@ -199,12 +199,6 @@ static const struct file_operations aoe_
+ 	.release = single_release,
+ };
+ 
+-/* From err.h in later kernels, for use below. */
+-static inline long __must_check IS_ERR_OR_NULL(__force const void *ptr)
+-{
+-	return !ptr || IS_ERR_VALUE((unsigned long)ptr);
+-}
+-
+ static void
+ aoedisk_add_debugfs(struct aoedev *d)
+ {

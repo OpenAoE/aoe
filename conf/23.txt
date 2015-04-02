@@ -1,0 +1,94 @@
+Jens Axboe added blk_start_queueing based on the code in the CFQ
+scheduler that ran the specified queue's request function, unplugging
+the queue first if necessary.
+
+  commit dc72ef4ae35c2016fb594bcc85ce871376682174
+  Author: Jens Axboe <axboe@suse.de>
+  Date:   Thu Jul 20 14:54:05 2006 +0200
+  
+      [PATCH] Add blk_start_queueing() helper
+      
+      CFQ implements this on its own now, but it's really block layer
+      knowledge. Tells a device queue to start dispatching requests to
+      the driver, taking care to unplug if needed. Also fixes the issue
+      where as/cfq will invoke a stopped queue, which we really don't
+      want.
+
+This commit is contained in "v2.6.19-rc1~640^2~34".
+
+We can use blk_start_queueing too.  The __generic_unplug_device
+function used in blk_start_queueing has been around since 2.5, so it's
+easy to just do the same thing it does inline when blk_start_queueing
+is not present.
+
+----
+In 2.6.31, blk_start_queueing is gone.  A review of git history shows
+that __blk_run_queue has not changed much since it appeared, so we can
+use it when it's present.
+
+commit a7f557923441186a3cdbabc54f1bcacf42b63bf5
+Author: Tejun Heo <tj@kernel.org>
+Date:   Thu Apr 23 11:05:17 2009 +0900
+
+    block: kill blk_start_queueing()
+    
+    blk_start_queueing() is identical to __blk_run_queue() except that it
+    doesn't check for recursion.  None of the current users depends on
+    blk_start_queueing() running request_fn directly.  Replace usages of
+    blk_start_queueing() with [__]blk_run_queue() and kill it.
+    
+    [ Impact: removal of mostly duplicate interface function ]
+    
+    Signed-off-by: Tejun Heo <tj@kernel.org>
+
+We use __blk_run_queue because blk_init_queue is called specifying the
+d->lock as the queue lock, and we hold the d->lock when calling
+__blk_run_queue.
+
+----
+In 2.6.38.5, __blk_run_queue has a new second parameter.
+
+commit 1654e7411a1ad4999fe7890ef51d2a2bbb1fcf76
+Author: Tejun Heo <tj@kernel.org>
+Date:   Wed Mar 2 08:48:05 2011 -0500
+
+    block: add @force_kblockd to __blk_run_queue()
+    
+    __blk_run_queue() automatically either calls q->request_fn() directly
+    or schedules kblockd depending on whether the function is recursed.
+    blk-flush implementation needs to be able to explicitly choose
+    kblockd.  Add @force_kblockd.
+    
+    All the current users are converted to specify %false for the
+    parameter and this patch doesn't introduce any behavior change.
+    
+    stable: This is prerequisite for fixing ide oops caused by the new
+            blk-flush implementation.
+
+----
+In 2.6.39, Christoph Hellwig removed the new second parameter.
+
+commit 24ecfbe27f65563909b14492afda2f1c21f7c044
+Author: Christoph Hellwig <hch@infradead.org>
+Date:   Mon Apr 18 11:41:33 2011 +0200
+
+    block: add blk_run_queue_async
+   
+    Instead of overloading __blk_run_queue to force an offload to kblockd
+    add a new blk_run_queue_async helper to do it explicitly.  I've kept
+    the blk_queue_stopped check for now, but I suspect it's not needed
+    as the check we do when the workqueue items runs should be enough.
+
+So the states are,
+
+  old
+	aoe manually calls the q->request_fn
+
+  bsq
+	aoe calls blk_start_queueing
+
+  brq1 NEW
+	aoe calls __blk_run_queue with one parameter
+
+  brq2
+	aoe calls __blk_run_queue with two parameters

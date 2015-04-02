@@ -1,0 +1,32 @@
+.TH coraid-update 8
+.SH NAME
+coraid-update \- upload an update file to a CORAID appliance
+.SH SYNOPSIS
+.nf
+.B coraid-update {update file} {AoE device}
+.fi
+.SH DESCRIPTION
+The
+.I coraid-update
+script performs a few sanity checks before copying the local
+update
+file to the remote update AoE target on the CORAID appliance.
+.PP
+Two arguments are provided: 1) the name of the update file
+to be uploaded, and 2) the special block device file corresponding
+to the
+update target, e.g., \fI/dev/etherd/e100.40\fP.
+.PP
+It generates no output and exits with a zero status when the update
+file has been successfully uploaded 
+to the update target on the appliance.  Otherwise, an error message is
+printed to standard error and \fI coraid-update\fR exits with a
+non-zero status.
+.SH "SEE ALSO"
+.IR aoe-discover (8),
+.IR aoe-interfaces (8),
+.IR aoe-stat (8),
+.IR aoetools (8),
+.IR udev (7).
+.SH AUTHOR
+Ed L. Cashin (ecashin@coraid.com)

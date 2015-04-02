@@ -1,0 +1,16 @@
+diff -upr old/linux/drivers/block/aoe/aoeblk.c new/linux/drivers/block/aoe/aoeblk.c
+--- old/linux/drivers/block/aoe/aoeblk.c	2013-06-20 15:01:07.540605241 -0400
++++ new/linux/drivers/block/aoe/aoeblk.c	2013-06-19 15:52:32.000000000 -0400
+@@ -164,11 +164,7 @@ static DEVICE_ATTR(state, S_IRUGO, aoedi
+ static DEVICE_ATTR(mac, S_IRUGO, aoedisk_show_mac, NULL);
+ static DEVICE_ATTR(netif, S_IRUGO, aoedisk_show_netif, NULL);
+ static struct device_attribute dev_attr_firmware_version = {
+-	.attr = {
+-		.name = "firmware-version",
+-		.mode = S_IRUGO,
+-		.owner = THIS_MODULE,
+-	},
++	.attr = { .name = "firmware-version", .mode = S_IRUGO },
+ 	.show = aoedisk_show_fwver,
+ };
+ static DEVICE_ATTR(payload, S_IRUGO, aoedisk_show_payload, NULL);

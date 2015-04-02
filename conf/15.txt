@@ -1,0 +1,2 @@
+In 2.6.22, the sk_buff members were changed around, so we use a
+function that provides access to the packet.

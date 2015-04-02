@@ -1,0 +1,11 @@
+  The class_simple_... functions were removed from the kernel in
+  2.6.13.
+
+  We want aoechr.c to use class_simple if $(KDIR) has it, but not if
+  it doesn't.
+
+  We can't just grep for class_simple in
+  $(KDIR)/include/linux/device.h because, e.g., Suse 9.3 Pro doesn't
+  have device.h there.  The warnings from gcc, though, should
+  consistently let us know whether the kernel sources have
+  class_simple or not.

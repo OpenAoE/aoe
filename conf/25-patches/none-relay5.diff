@@ -1,0 +1,74 @@
+diff -upr none/linux/drivers/block/aoe/aoedbg.c relay5/linux/drivers/block/aoe/aoedbg.c
+--- none/linux/drivers/block/aoe/aoedbg.c	2008-10-17 11:51:51.000000000 -0400
++++ relay5/linux/drivers/block/aoe/aoedbg.c	2008-10-17 11:10:02.000000000 -0400
+@@ -1,59 +1,12 @@
+ #include <linux/hdreg.h>
+ #include <linux/mempool.h>
+-#include <linux/jiffies.h>
+-#include <linux/workqueue.h>
+-#include <linux/completion.h>
+-#include <linux/moduleparam.h>
+-#include <linux/slab.h>
+-#include <linux/fs.h>
++#include <linux/debugfs.h>
++#include <linux/relay.h>
+ #include "aoe.h"
+ 
+ #define SUBBUF_SIZE 262144
+ #define N_SUBBUFS 8
+ 
+-#undef AOEDBG_ACTIVE
+-#define AOEDBG_ACTIVE 0
+-/* dummy implementations for systems without relay */
+-struct rchan {
+-	int dummy;
+-};
+-struct rchan_buf {
+-	int dummy;
+-};
+-static struct file_operations relay_file_operations;
+-struct rchan_callbacks
+-{
+-	int (*subbuf_start)(struct rchan_buf *buf,
+-			    void *subbuf,
+-			    void *prev_subbuf,
+-			    size_t prev_padding);
+-	struct dentry *(*create_buf_file)(const char *filename,
+-					  struct dentry *parent,
+-					  int mode,
+-					  struct rchan_buf *buf,
+-					  int *is_global);
+-	int (*remove_buf_file)(struct dentry *dentry);
+-};
+-static struct dentry *
+-debugfs_create_file(const char *name, mode_t mode,
+-		    struct dentry *parent, void *data,
+-		    const struct file_operations *fops)
+-{ return NULL; }
+-void debugfs_remove(struct dentry *dentry) { }
+-struct rchan *relay_open(const char *base_filename,
+-			 struct dentry *parent,
+-			 size_t subbuf_size,
+-			 size_t n_subbufs,
+-			 struct rchan_callbacks *cb,
+-			 void *private_data)
+-{ return NULL; }
+-static void relay_write(struct rchan *chan,
+-			const void *data,
+-			size_t length)
+-{ }
+-extern void relay_flush(struct rchan *chan) { }
+-extern void relay_close(struct rchan *chan) { }
+-
+ /* aoe module channel for ad hoc messages */
+ static struct rchan *chan;
+ 
+@@ -112,7 +66,7 @@ xrelay_open(const char *base_fnam,
+ {
+ 	struct rchan *c;
+ 
+-	c = relay_open(base_fnam, parent, subbuf_size, n_subbufs, &cb, NULL);
++	c = relay_open(base_fnam, parent, subbuf_size, n_subbufs, &cb);
+ 
+ 	if (!c)
+ 		printk(KERN_ERR

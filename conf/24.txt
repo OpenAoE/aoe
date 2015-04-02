@@ -1,0 +1,47 @@
+The poor device_create function is a victim of chronic fiddling.
+After the removal of class_simple, there are several states the kernel
+has gone through.
+
+  cdc4	
+	class_device_create with four arguments, found before
+	2.6.15-rc7 or so.
+
+  cdc5
+	class_device_create with five arguments
+
+  dcd
+	device_create_drvdata was around by the time
+	class_device_create was finally removed in commit
+	c3b19ff06e0808555403491d61e8f0cbbb53e933 (which appears in
+	v2.6.26-rc1~99^2~1).
+
+Then device_create_drvdata got removed, and callers of
+device_create_drvdata were just switched to device_create without
+further modification.
+
+  dc NEW
+  	device_create with 5 arguments
+
+commit 7fb6b5d51daf3613045258ee8add07022d8c39d3
+Author: Greg Kroah-Hartman <gregkh@suse.de>
+Date:   Mon Jul 21 20:03:34 2008 -0700
+
+    device create: remove device_create_drvdata
+    
+    Now that the tree is cleaned up, device_create_drvdata can be safely
+    removed.
+    
+    Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
+
+commit 3ee074bf432d24a92894397ac48ad2f2bb95efdc
+Author: Greg Kroah-Hartman <gregkh@suse.de>
+Date:   Mon Jul 21 20:03:34 2008 -0700
+
+    device create: ide: convert device_create_drvdata to device_create
+    
+    Now that device_create() has been audited, rename things back to the
+    original call to be sane.
+    
+    Cc: Bartlomiej Zolnierkiewicz <bzolnier@gmail.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
+

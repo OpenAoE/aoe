@@ -1,0 +1,1 @@
+DEFINE_SPINLOCK appeared in 2.6.11.

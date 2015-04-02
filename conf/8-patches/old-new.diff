@@ -1,0 +1,66 @@
+diff --git a/linux/drivers/block/aoe/aoe.h b/linux/drivers/block/aoe/aoe.h
+index ece38d3..dc3be54 100644
+--- a/linux/drivers/block/aoe/aoe.h
++++ b/linux/drivers/block/aoe/aoe.h
+@@ -253,9 +253,6 @@ unsigned long long mac_addr(char addr[6]);
+  */
+ extern void *aoe_kcalloc(size_t, size_t, int);
+ 
+-/* compatibility with pre-2.6.9 kernels */
+-unsigned long msleep_interruptible(unsigned int msecs);
+-
+ #define AOEDBG_ACTIVE 0
+ void __init aoedbg_init(void);
+ void aoedbg_print(char *fmt, ...);
+diff --git a/linux/drivers/block/aoe/aoechr.c b/linux/drivers/block/aoe/aoechr.c
+index 3eb619b..b542143 100644
+--- a/linux/drivers/block/aoe/aoechr.c
++++ b/linux/drivers/block/aoe/aoechr.c
+@@ -72,47 +72,6 @@ interfaces(const char __user *str, size_t size)
+ 	return 0;
+ }
+ 
+-/* from include/linux/time.h in 2.6.9 */
+-static inline unsigned int aoe_jiffies_to_msecs(const unsigned long j)
+-{
+-#if HZ <= 1000 && !(1000 % HZ)
+-	return (1000 / HZ) * j;
+-#elif HZ > 1000 && !(HZ % 1000)
+-	return (j + (HZ / 1000) - 1)/(HZ / 1000);
+-#else
+-	return (j * 1000) / HZ;
+-#endif
+-}
+-
+-static inline unsigned long aoe_msecs_to_jiffies(const unsigned int m)
+-{
+-	if (m > aoe_jiffies_to_msecs(MAX_JIFFY_OFFSET))
+-		return MAX_JIFFY_OFFSET;
+-#if HZ <= 1000 && !(1000 % HZ)
+-	return (m + (1000 / HZ) - 1) / (1000 / HZ);
+-#elif HZ > 1000 && !(HZ % 1000)
+-	return m * (HZ / 1000);
+-#else
+-	return (m * HZ + 999) / 1000;
+-#endif
+-}
+-
+-/* from kernel/timer.c in 2.6.9 */
+-/**
+- * msleep_interruptible - sleep waiting for waitqueue interruptions
+- * @msecs: Time in milliseconds to sleep for
+- */
+-unsigned long msleep_interruptible(unsigned int msecs)
+-{
+-	unsigned long timeout = aoe_msecs_to_jiffies(msecs);
+-
+-	while (timeout && !signal_pending(current)) {
+-		set_current_state(TASK_INTERRUPTIBLE);
+-		timeout = schedule_timeout(timeout);
+-	}
+-	return aoe_jiffies_to_msecs(timeout);
+-}
+-
+ static int
+ revalidate(const char __user *str, size_t size)
+ {

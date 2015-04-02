@@ -1,0 +1,27 @@
+diff --git a/linux/drivers/block/aoe/aoecmd.c b/linux/drivers/block/aoe/aoecmd.c
+index acc54b8..8e5e879 100644
+--- a/linux/drivers/block/aoe/aoecmd.c
++++ b/linux/drivers/block/aoe/aoecmd.c
+@@ -905,20 +905,16 @@ void
+ aoe_end_request(struct aoedev *d, struct request *rq, int fastfail)
+ {
+ 	struct bio *bio;
+-	int bok, rok;
++	int bok;
+ 	struct request_queue *q;
+ 
+ 	q = d->blkq;
+ 	if (rq == d->ip.rq)
+ 		d->ip.rq = NULL;
+-	rok = 1;
+ 	do {
+ 		bio = rq->bio;
+ 		bok = !fastfail && test_bit(BIO_UPTODATE, &bio->bi_flags);
+-		if (!bok)
+-			rok = 0;
+-	} while (end_that_request_first(rq, bok, bio->bi_size / 512));
+-	end_that_request_last(rq, rok);
++	} while (__blk_end_request(rq, bok ? 0 : -EIO, bio->bi_size));
+ 
+ 	if (!fastfail) {
+ 		// cf. http://lkml.org/lkml/2006/10/31/28

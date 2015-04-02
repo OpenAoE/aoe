@@ -1,0 +1,40 @@
+In 2.6.31, elv_next_request and blk_dequeue_request are gone.
+
+commit 9934c8c04561413609d2bc38c6b9f268cba774a4
+Author: Tejun Heo <tj@kernel.org>
+Date:   Fri May 8 11:54:16 2009 +0900
+
+    block: implement and enforce request peek/start/fetch
+    
+    Till now block layer allowed two separate modes of request execution.
+    A request is always acquired from the request queue via
+    elv_next_request().  After that, drivers are free to either dequeue it
+    or process it without dequeueing.  Dequeue allows elv_next_request()
+    to return the next request so that multiple requests can be in flight.
+    
+    Executing requests without dequeueing has its merits mostly in
+    allowing drivers for simpler devices which can't do sg to deal with
+    segments only without considering request boundary.  However, the
+    benefit this brings is dubious and declining while the cost of the API
+    ambiguity is increasing.  Segment based drivers are usually for very
+    old or limited devices and as converting to dequeueing model isn't
+    difficult, it doesn't justify the API overhead it puts on block layer
+    and its more modern users.
+    
+    Previous patches converted all block low level drivers to dequeueing
+    model.  This patch completes the API transition by...
+    
+    * renaming elv_next_request() to blk_peek_request()
+    
+    * renaming blkdev_dequeue_request() to blk_start_request()
+    
+    * adding blk_fetch_request() which is combination of peek and start
+    
+    * disallowing completion of queued (not started) requests
+    
+    * applying new API to all LLDs
+    
+    Renamings are for consistency and to break out of tree code so that
+    it's apparent that out of tree drivers need updating.
+    
+    [ Impact: block request issue API cleanup, no functional change ]

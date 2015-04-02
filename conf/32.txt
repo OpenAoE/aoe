@@ -1,0 +1,15 @@
+SLES 10, with its 2.6.16.60-0.54.5 kernel, doesn't have
+skb_mac_header, so test 15 treats it as "old", but it has a
+skb_reset_mac_header in skbuff.h, so it's an oddball.
+
+This test accounts for that special case, but it's only relevant when
+the aoe driver has been patched to include definitions for
+skb_mac_header et al.  So 32-[ak]v.sh report "normal" if it hasn't
+been patched.  This is one of those inter-test dependencies I like to
+avoid.
+
+  sles10
+	has no skb_mac_header but has skb_reset_mac_header
+
+  normal NEW
+	everything else

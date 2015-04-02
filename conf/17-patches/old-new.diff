@@ -1,0 +1,13 @@
+diff --git a/linux/drivers/block/aoe/aoe.h b/linux/drivers/block/aoe/aoe.h
+index f1f2b6e..d097a5c 100644
+--- a/linux/drivers/block/aoe/aoe.h
++++ b/linux/drivers/block/aoe/aoe.h
+@@ -13,8 +13,6 @@
+ #define ETH_P_AOE 0x88a2
+ #endif
+ 
+-#define DEFINE_SPINLOCK(x) spinlock_t x = SPIN_LOCK_UNLOCKED
+-
+ enum {
+ 	AOECMD_ATA,
+ 	AOECMD_CFG,

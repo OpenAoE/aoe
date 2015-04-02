@@ -1,0 +1,195 @@
+2013-08-07 Ed Cashin <ecashin@coraid.com>
+	support debugfs-exported debug info in sos-linux
+	release 36
+
+2013-07-10 Ed Cashin <ecashin@coraid.com>
+	add pkg subdirectory for distro-specific packaging files
+
+2012-09-20 Ed Cashin <ecashin@coraid.com>
+	only use one of the sysfs version files in aoe-version
+	release 35
+
+2012-06-27 Ed Cashin <ecashin@coraid.com>
+	restore payload field in aoe-stat output
+	release 34
+
+2012-01-24 Ed Cashin <ecashin@coraid.com>
+	handle missing sysfs files in aoe-stat
+	update docs for 3.x kernels
+	remove "function" keyword in aoe-stat for Ubuntu
+	release 33
+
+2010-08-18 Justin Sanders <justin@coraid.com>
+	aoe-sancheck fix: zero out every interface
+	release 32
+
+2010-08-18 Justin Sanders <justin@coraid.com>
+	aoe-sancheck tool diagnoses MTU and other network issues
+	release 31
+
+2009-03-03 Ed Cashin <ecashin@coraid.com>
+	aoe-version modinfo workaround: cd to a directory without aoe
+	release 30
+
+2008-12-09 Ed Cashin <ecashin@coraid.com>
+	mention that aoeping uses raw sockets in manpage
+	use absolute path to aoe.ko when ./aoe is readable
+	release 29
+
+2008-11-11 Ed Cashin <ecashin@coraid.com>
+	remove "function" reserved word from aoe-flush (for dash shell)
+	release 28
+
+2008-08-01 Ed Cashin <ecashin@coraid.com>
+	use ".txt" extension for output file of sos-linux
+
+2008-06-27 Ed Cashin <ecashin@coraid.com>
+	aoeping: recognize errors in SMART command response
+	aoe-stat manpage improvements
+	release 27
+
+2008-05-14 "Ed L. Cashin" <ecashin@coraid.com>
+	add sos-linux tool for collecting localhost information
+	release 26
+
+2008-04-11 "Ed L. Cashin" <ecashin@coraid.com>
+	create coraid-update for uploading update file to an update target
+	create coraid-update manpage
+	release 25
+
+2008-03-25 "Ed L. Cashin" <ecashin@coraid.com>
+	clean up aoecfg object files in "clean" target
+
+2008-02-22 "Ed L. Cashin" <ecashin@coraid.com>
+	make aoeping and aoecfg more conforming to AoE protocol
+	release 24
+
+2008-01-09 "Ed L. Cashin" <ecashin@coraid.com>
+	release 23
+
+2008-01-09 Sam Hopkins <sah@coraid.com>
+	support new payload size information from aoe driver
+
+2008-01-08 "Ed L. Cashin" <ecashin@coraid.com>
+	handle aoe-flush without arguments correctly
+
+2007-12-19 "Ed L. Cashin" <ecashin@coraid.com>
+	fix aoecfg manpage typo (-s for string)
+
+2007-12-10 "Ed L. Cashin" <ecashin@coraid.com>
+	aoe-flush: support flushing specific devices
+	release 22
+
+2007-10-29 "Ed L. Cashin" <ecashin@coraid.com>
+	aoe-interfaces should complain about non network interfaces
+	aoe-interfaces should accept quoted list of interfaces
+	aoe-interfaces clearing and setting are exclusive actions
+	release 21
+
+2007-10-12 "Ed L. Cashin" <ecashin@coraid.com>
+	add Erik Quanstrom's aoecfg program
+	signal error when specified network interface starts with digit
+	use a tag in the AoE header
+	do not print shelf and slot when user specified both
+	have aoeping use a tag for the first packet
+	add pretty printing of ATA device identify fields
+	  based on input from Joshua Nicholas
+	release 20
+
+2007-08-27 "Ed L. Cashin" <ecashin@coraid.com>
+	add copyright information
+	support kernel.org aoe driver in aoe-version
+	add aoetools manpage
+	release 19
+
+2007-08-08 "Ed L. Cashin" <ecashin@coraid.com>
+	distinguish between missing device nodes and wrong ones
+	release 18
+
+2007-07-26 "Ed L. Cashin" <ecashin@coraid.com>
+	aoe-mkdevs and aoe-mkshelf are for systems without udev
+	aoe-stat warns when device node has wrong minor number
+	new script, aoe-version, shows installed and running sfw
+	release 17
+
+2007-07-17 "Ed L. Cashin" <ecashin@coraid.com>
+	check for char devices specifically before using them
+
+2007-06-01 "Ed L. Cashin" <ecashin@coraid.com>
+	workaround dash POSIX math bug
+	release 16
+
+2007-03-20 "Ed L. Cashin" <ecashin@coraid.com>
+	add quoting to aoe-flush
+	release 15
+
+2007-02-26 Marcus Rueckert <darix@web.de>
+	create the same directories we install to
+
+2007-02-06 Sam Hopkins <sah@coraid.com>
+	add support for -c flag to aoe-interfaces
+	add support for -a flag to aoe-flush
+	update manpages for aoe-interfaces, aoe-flush
+	release 14
+
+2006-12-21 Sam Hopkins <sah@coraid.com>
+	support aoe devices without "etherd" prefix in name
+	create new character device nodes
+	release 13
+
+2006-10-30 Sam Hopkins <sah@coraid.com>
+	formatting cleanup of man pages
+	cleanup of scripts, adding error checking
+	add aoe-flush command
+	release 12
+
+2006-10-13 David Martinez Moreno <ender@debian.org>
+	aoe-stat: POSIX shell math can't count as high as bash
+
+2006-09-07 Anthony Wright <anthony@communitymesh.com>
+	use POSIX shell math instead of relying on dc or bc
+	release 11
+
+2006-05-25 "Ed L. Cashin" <ecashin@coraid.com>
+	update README: aoetools are for 2.6 systems
+	release 10
+
+2006-01-18 "Ed L. Cashin" <ecashin@coraid.com>
+	aoe-revalidate: notice error in writing to revalidate device
+	release 9
+
+2005-11-09 Sam Hopkins <sah@coraid.com>
+	add aoe-revalidate
+	document driver compatibility
+	release 8
+
+2005-08-18 "Ed L. Cashin" <ecashin@coraid.com>
+	format sub-gigabyte device sizes correctly
+	release 7
+
+2005-08-17 "Ed L. Cashin" <ecashin@coraid.com>
+	make aoe-stat show device size
+	release 6
+
+2005-07-13 "Ed L. Cashin" <ecashin@coraid.com>
+	make number of slots per shelf configurable
+	Rob Holland <tigger@gentoo.org>: install using PREFIX
+	"make install" builds aoeping
+	avoid gcc 4 warnings by specifying uchar in params
+	release 5
+
+2005-05-17 "Ed L. Cashin" <ecashin@coraid.com>
+	fix typo in Makefile preventing aoeping installation: s/PROG/PROGS/
+	add TODO file
+	release 4
+
+2005-04-14 "Ed L. Cashin" <ecashin@coraid.com>
+	add very basic SMART support to aoeping
+	release 3
+
+2005-04-12 "Ed L. Cashin" <ecashin@coraid.com>
+	add aoeping, a userland tool for simple AoE communications
+	release 2
+
+2005-03-23 "Ed L. Cashin" <ecashin@coraid.com>
+	initial release of aoetools, version 1

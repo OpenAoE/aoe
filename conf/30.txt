@@ -1,0 +1,19 @@
+2.6.30 no longer defines WIN_READ, etc., except *outside* of kernel
+sources.
+
+In older kernels the ATA_CMD_PIO_* values are present, but in 2.6.9,
+for instance, you can't include both hdreg.h and ata.h, so we support
+those old kernels by using the WIN_* macros.
+
+commit 04b3ab52a000ab7e718efc97e9fdd67d95002d11
+Author: Bartlomiej Zolnierkiewicz <bzolnier@gmail.com>
+Date:   Wed Apr 1 21:42:24 2009 +0200
+
+    aoe: WIN_* -> ATA_CMD_*
+    
+    * Use ATA_CMD_* defines instead of WIN_* ones.
+    
+    * Include <linux/ata.h> directly instead of through <linux/hdreg.h>.
+    
+    Cc: Ed L. Cashin <ecashin@coraid.com>
+    Signed-off-by: Bartlomiej Zolnierkiewicz <bzolnier@gmail.com>

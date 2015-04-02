@@ -1,0 +1,73 @@
+.TH aoe-mkdevs 8
+.SH NAME
+aoe-mkdevs \- create special device files for aoe driver
+.SH SYNOPSIS
+.nf
+.B aoe-mkdevs {device-dir}
+.B env n_partitions=1 aoe-mkdevs {device-dir}
+.fi
+.SH DESCRIPTION
+The
+.I aoe-mkdevs
+command is deprecated in favor of udev.  Systems with udev do not need
+to use the \fIaoe-mkdevs\fP or \fIaoe-mkself\fP commands, because udev
+will create device nodes as needed.
+.PP
+Systems without udev use \fIaoe-mkdevs\fP to create the character
+special files necessary to 
+control the aoe driver.  The \fIaoe-mkdevs\fP command uses 
+.I aoe-mkshelf
+to also create block special files.
+.PP
+The aoe drivers after version 49 support dynamic minor device numbers
+so that a greater number of devices can be supported.  The
+\fIaoe-mkdevs\fP command is incompatible with dynamic device numbers.
+If your system lacks udev, and you are using an aoe driver version 50
+or above, use the aoe_dyndevs=0 module option to force the aoe driver
+to use static device numbers.
+.PP
+If you are not using dynamic device numbers, and you built your aoe
+driver to support only one partition per device 
+(whole-disk 
+partitions), then the device files must match, and you should use the 
+.I n_partitions
+environment variable described below.
+.SS Arguments
+.TP
+\fBdevice-dir\fP
+This should be the name of the directory where the special device files
+will be created.
+.SH ENVIRONMENT VARIABLES
+If the
+.I n_partitions
+variable is set in the environment, it will override the default
+number of partitions per aoe disk, namely 16.
+.SH EXAMPLE
+In this example, the root user on a host named
+.I nai
+creates special files for using the aoe disks in shelf 7.  After
+remembering that the driver doesn't have partition support, this
+sysadmin gets rid of the mismatching device nodes and calls
+\fIaoe-mkdevs\fP again with \fIn_partitions\fP set to 1.
+.IP
+.EX
+.nf
+nai:~# rm -rf /dev/etherd 
+nai:~# aoe-mkdevs /dev/etherd
+nai:~# ls /dev/etherd | wc -l
+1603
+nai:~# rm -rf /dev/etherd
+nai:~# n_partitions=1 aoe-mkdevs /dev/etherd
+nai:~# ls /dev/etherd | wc -l
+103
+.fi
+.EE
+.SH "SEE ALSO"
+.IR aoe-discover (8),
+.IR aoe-interfaces (8),
+.IR aoe-mkshelf (8),
+.IR aoe-stat (8),
+.IR aoetools (8),
+.IR udev (7).
+.SH AUTHOR
+Ed L. Cashin (ecashin@coraid.com)

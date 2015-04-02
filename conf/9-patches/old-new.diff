@@ -1,0 +1,24 @@
+diff -upr a/linux/drivers/block/aoe/aoeblk.c b/linux/drivers/block/aoe/aoeblk.c
+--- a/linux/drivers/block/aoe/aoeblk.c	2007-07-09 15:43:36.000000000 -0400
++++ b/linux/drivers/block/aoe/aoeblk.c	2007-07-09 15:42:58.000000000 -0400
+@@ -23,7 +23,7 @@ aoe_bio_pagedec(struct bio *bio)
+ 	int i;
+ 
+ 	bio_for_each_segment(bv, bio, i)
+-		atomic_dec(&bv->bv_page->count);
++		atomic_dec(&bv->bv_page->_count);
+ }
+ 
+ static ssize_t aoedisk_show_state(struct gendisk *disk, char *page)
+diff -upr a/linux/drivers/block/aoe/aoecmd.c b/linux/drivers/block/aoe/aoecmd.c
+--- a/linux/drivers/block/aoe/aoecmd.c	2007-07-09 15:43:36.000000000 -0400
++++ b/linux/drivers/block/aoe/aoecmd.c	2007-07-09 15:42:53.000000000 -0400
+@@ -672,7 +672,7 @@ bio_pageinc(struct bio *bio)
+ 	int i;
+ 
+ 	bio_for_each_segment(bv, bio, i)
+-		atomic_inc(&bv->bv_page->count);
++		atomic_inc(&bv->bv_page->_count);
+ }
+ 
+ static void

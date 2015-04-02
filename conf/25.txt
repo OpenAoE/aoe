@@ -1,0 +1,31 @@
+Not all kernels have relay (formerly relayfs) support.  When they do,
+there are a few forms.
+
+  none
+  	No relay support.
+
+  fs5
+  	The first relayfs in Linus's tree uses relayfs_fs.h with 5
+  	parms to relay_open.
+
+	commit e82894f84dbba130ab46c97748c03647f8204f92
+	Author: Tom Zanussi <zanussi@us.ibm.com>
+	Date:   Tue Sep 6 15:16:30 2005 -0700
+
+	This commit appears in v2.6.14-rc1~734.
+
+  relay5
+  	Then it was made "relay", not "relayfs", and the header file
+  	changed.
+
+	commit b86ff981a8252d83d6a7719ae09f3a05307e3592
+	Author: Jens Axboe <axboe@suse.de>
+	Date:   Thu Mar 23 19:56:55 2006 +0100
+
+  relay6	NEW
+  	Finally a private data parameter was added to relay_open.
+
+	commit 23c887522e912ca494950796a95df8dd210f4b01
+	Author: Mathieu Desnoyers <mathieu.desnoyers@polymtl.ca>
+	Date:   Sat Feb 10 01:45:05 2007 -0800
+

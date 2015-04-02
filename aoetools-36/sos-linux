@@ -1,0 +1,49 @@
+#! /bin/sh
+
+me="`basename $0`"
+outf="$HOME/sos-`hostname`-`date +%Y%m%d-%H%M%S`.txt"
+
+if test "`whoami`" != "root"; then
+	echo "$me: please run $me as root" 1>&2
+	exit 1
+fi
+echo "$me: output file is $outf"
+
+exec > $outf
+exec 2>&1
+set -x
+uname -a
+grep . /etc/*release* /etc/*version* | sed 50q
+find /sys/module/aoe -name version | xargs cat
+cat /proc/mounts
+aoe-version
+aoe-stat
+cat /proc/mdstat
+pvs
+ifconfig -a
+free
+dmesg | tail -n 50
+lspci
+set +x
+for i in `aoe-stat | awk '{print $3}' | sed 's!,! !g'`; do
+	echo ethtool -S $i
+done | sort | uniq | sh -x
+# top -b -n 1
+
+# check for old-style sysfs-exported debug information, ignoring errors
+grep . /sys/block/etherd*/debug /dev/null
+
+# check for new-style debugfs-exported debug information, ignoring errors
+dmnt=/sys/kernel/debug
+didmount=
+mounted=`awk '$3=="debugfs"{print $2}' /proc/mounts`
+if test "x$mounted" = "x" && mount -t debugfs none "$dmnt"; then
+	didmount="$dmnt"
+	mounted="$dmnt"
+fi
+cd "$mounted"/aoe && grep . e[0-9]*.*[0-9]
+cd /
+if test "x$didmount" != "x"; then
+	umount "$didmount"
+fi
+exit 0

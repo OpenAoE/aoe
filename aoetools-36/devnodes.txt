@@ -1,0 +1,38 @@
+			 Driver Compatibility
+
+Users of udev have device nodes like /dev/etherd/e0.0 created for them
+automatically, as needed. These are dynamic device nodes.  The aoe
+driver version 50 and above use dynamic device node minor numbers in
+order to support a greater number of AoE devices.
+
+Some systems use static device nodes, which are present in /dev
+regardless of what AoE devices are really available to the system. The
+aoetools contain the aoe-mkdevs and aoe-mkshelf commands, which create
+these static device nodes.
+
+If the static device nodes do not match the static device minor
+numbers in the kernel, you could accidentally perform reads and writes
+to the wrong AoE device.  (It really is easier to let udev take care
+of the device nodes.)
+
+If you use an aoe driver from the CORAID website
+(http://support.coraid.com/support/linux/) then just use the aoetools that
+come bundled with that deiver.  If you don't have udev, make sure you
+always load the aoe module with the aoe_dyndevs=0 option for any
+driver version above 49.
+
+If you didn't get your aoe driver from the CORAID website, and you
+can't use udev, then here's what to do:
+
+    * Of course, read the README file in the aoetools sources.
+
+    * To use aoetools-8 and later with older 2.6 kernels (2.6.13 and
+      earlier), build the aoetools with an extra parameter for "make",
+      like this:
+
+        make NPERSHELF=10
+
+    * Using aoetools-7 and earlier with newer kernels (2.6.14 and
+      later) is not recommended.
+
+Other combinations should work with the default settings.

@@ -1,0 +1,79 @@
+commit 077517992e7cb7e0b4407fb9cb3bbcf01f3d36e2
+Author: Ed Cashin <ecashin@coraid.com>
+Date:   Mon Jul 20 14:19:06 2009 -0400
+
+    include ata.h and use ATA_CMD_PIO_* instead of WIN_*
+    
+    based on 04b3ab52a000ab7e718efc97e9fdd67d95002d11
+    Author: Bartlomiej Zolnierkiewicz <bzolnier@gmail.com>
+    Date:   Wed Apr 1 21:42:24 2009 +0200
+    
+        aoe: WIN_* -> ATA_CMD_*
+    
+        * Use ATA_CMD_* defines instead of WIN_* ones.
+    
+        * Include <linux/ata.h> directly instead of through <linux/hdreg.h>.
+    
+        Cc: Ed L. Cashin <ecashin@coraid.com>
+        Signed-off-by: Bartlomiej Zolnierkiewicz <bzolnier@gmail.com>
+
+diff --git a/linux/drivers/block/aoe/aoecmd.c b/linux/drivers/block/aoe/aoecmd.c
+index 741dd82..d188b5b 100644
+--- a/linux/drivers/block/aoe/aoecmd.c
++++ b/linux/drivers/block/aoe/aoecmd.c
+@@ -4,6 +4,7 @@
+  * Filesystem request handling methods
+  */
+ 
++#include <linux/ata.h>
+ #include <linux/hdreg.h>
+ #include <linux/blkdev.h>
+ #include <linux/skbuff.h>
+@@ -377,7 +378,7 @@ ata_rw_frameinit(struct frame *f)
+ 		writebit = 0;
+ 	}
+ 
+-	ah->cmdstat = WIN_READ | writebit | extbit;
++	ah->cmdstat = ATA_CMD_PIO_READ | writebit | extbit;
+ 	skb->dev = t->ifp->nd;
+ }
+ 
+@@ -1182,8 +1183,8 @@ noskb:		if (buf)
+ 
+ 	n = ahout->scnt << 9;
+ 	switch (ahout->cmdstat) {
+-	case WIN_READ:
+-	case WIN_READ_EXT:
++	case ATA_CMD_PIO_READ:
++	case ATA_CMD_PIO_READ_EXT:
+ 		if (skb->len < n) {
+ 			printk(KERN_ERR
+ 				"aoe: runt data size in read from e%ld.%d."
+@@ -1194,15 +1195,15 @@ noskb:		if (buf)
+ 			break;
+ 		}
+ 		bvcpy(f->bv, f->bv_off, skb, n);
+-	case WIN_WRITE:
+-	case WIN_WRITE_EXT:
++	case ATA_CMD_PIO_WRITE:
++	case ATA_CMD_PIO_WRITE_EXT:
+ 		spin_lock_irq(&d->lock);
+ 		ifp = getif(t, skb->dev);
+ 		if (ifp)
+ 			ifp->lost = 0;
+ 		spin_unlock_irq(&d->lock);
+ 		break;
+-	case WIN_IDENTIFY:
++	case ATA_CMD_ID_ATA:
+ 		if (skb->len < 512) {
+ 			printk(KERN_INFO
+ 				"aoe: runt data size in ataid from e%ld.%d."
+@@ -1425,7 +1426,7 @@ aoecmd_ata_id(struct aoedev *d)
+ 
+ 	/* set up ata header */
+ 	ah->scnt = 1;
+-	ah->cmdstat = WIN_IDENTIFY;
++	ah->cmdstat = ATA_CMD_ID_ATA;
+ 	ah->lba3 = 0xa0;
+ 
+ 	skb->dev = t->ifp->nd;

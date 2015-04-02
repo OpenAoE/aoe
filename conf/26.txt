@@ -1,0 +1,20 @@
+The list_replace function appears in v2.6.18-rc1~1081^2~31.
+
+We can provide it inline for older kernels.
+
+commit 54e73770357142e297c916c7865f5fca7499f69c
+Author: Oleg Nesterov <oleg@tv-sign.ru>
+Date:   Fri Jun 23 02:05:54 2006 -0700
+
+    [PATCH] list: introduce list_replace() helper
+    
+    list_replace() is similar to list_replace_rcu(), but unlike
+    list_replace_rcu() it
+    
+        could be used when list_empty(old) == 1
+    
+        doesn't use barriers
+    
+    Signed-off-by: Oleg Nesterov <oleg@tv-sign.ru>
+    Signed-off-by: Andrew Morton <akpm@osdl.org>
+    Signed-off-by: Linus Torvalds <torvalds@osdl.org>

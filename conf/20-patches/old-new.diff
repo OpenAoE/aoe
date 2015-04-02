@@ -1,0 +1,13 @@
+diff --git a/linux/drivers/block/aoe/aoecmd.c b/linux/drivers/block/aoe/aoecmd.c
+index eedcfbb..507b38d 100644
+--- a/linux/drivers/block/aoe/aoecmd.c
++++ b/linux/drivers/block/aoe/aoecmd.c
+@@ -673,7 +673,7 @@ rqbiocnt(struct request *r)
+ 	struct bio *bio;
+ 	ushort n = 0;
+ 
+-	rq_for_each_bio(bio, r)
++	__rq_for_each_bio(bio, r)
+ 		n++;
+ 	return n;
+ }

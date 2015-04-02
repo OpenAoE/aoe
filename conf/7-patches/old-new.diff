@@ -1,0 +1,11 @@
+--- aoet/linux/drivers/block/aoe/aoecmd.c.20070705	2007-07-05 11:34:25.000000000 -0400
++++ aoet/linux/drivers/block/aoe/aoecmd.c	2007-07-05 11:05:33.000000000 -0400
+@@ -998,7 +998,7 @@ noskb:	if (buf)
+ 				skb->len);
+ 			break;
+ 		}
+-		if (skb_is_nonlinear(skb) && skb_linearize(skb, GFP_ATOMIC))
++		if (skb_linearize(skb))
+ 			break;
+ 		spin_lock_irq(&d->lock);
+ 		ataid_complete(d, t, skb->data);

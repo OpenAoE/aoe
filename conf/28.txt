@@ -1,0 +1,10 @@
+In 2.6.28, the prototype of the open handler was changed.  The
+kernel.org aoe driver was modified by this commit:
+
+  commit 94562c175113cf91204a77269eabeea32e1f38db
+  Author: Al Viro <viro@zeniv.linux.org.uk>
+  Date:   Sun Mar 2 09:23:18 2008 -0500
+  
+      [PATCH] switch aoeblk
+  
+Basically, they stopped using a pointer to struct inode.

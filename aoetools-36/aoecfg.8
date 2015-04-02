@@ -1,0 +1,77 @@
+.TH aoecfg 8
+.SH NAME
+aoecfg \- manipulate AoE configuration strings
+.SH SYNOPSIS
+.B aoecfg
+[-c \fIcmd\fR] [-s \fIcfgstr\fR] [-t \fItimeout\fR] [\fIshelf slot\fR] [\fInetif\fR]
+.fi
+.SH DESCRIPTION
+.IR Aoecfg (8)
+sends AoE configuration commands that control the retrivial, conditional
+or unconditional setting of AoE configuration strings.  Since configuration
+happens before the MAC address of the target is known, the packet is
+broadcast.  AoE targets with a matching shelf and slot respond.  Since
+the default shelf and slot are the wildcard values 0xffff and 0xff,
+with no arguments
+.IR aoecfg (8)
+will return configuration strings from all targets visible
+on the default interface,
+.IR eth0 .
+.SH OPTIONS
+.TP 8
+.BI \-c " cmd"
+specify the AoE configuration command.  The default is
+.IR read .
+The available commands are
+.HP 8
+.B read
+Read the server config string without performing any test and
+respond.
+.HP 8
+.B test
+Respond only if the specified string exactly matches the server
+configuration string.
+.HP 8
+.B prefix
+Respond only if the specified string is a prefix of the server
+configuration string.
+.HP 8
+.B set
+If the current server config string is empty, set the server config
+string to the argument string and respond.  If the current server
+config string is not empty, return a response with Flags bit E set
+and Error set to 4.
+.HP 8
+.B fset
+Force set the server config string to the argument string and respond.
+.TP
+.BI \-s " cfgstr"
+specify the config string.
+.TP
+.BI \-t " timeout"
+specify the timeout in seconds.  The default is no timeout.  If neither the shelf
+nor the slot are specified,
+.IR aoecfg (8)
+will exit after the first result.  Otherwise,
+.IR aoecfg (8)
+will exit only after the timeout has expired since it does not know
+how many responses to expect.
+.TP
+.B shelf slot
+specify the shelf and slot used in the query.  If unspecified, they
+default to broadcast.
+.TP
+.B netif
+specifiy the network interface.  The default is
+.IR eth0 .
+.SH "SEE ALSO"
+.IR aoe-discover (8),
+.IR aoe-interfaces (8),
+.IR aoe-mkdevs (8),
+.IR aoe-mkshelf (8),
+.IR aoe-stat (8),
+.IR aoeping (8),
+\fIAoE (ATA over Ethernet)\fP: http://support.coraid.com/documents/AoEr10.txt,
+\fIATA specification\fP
+.SH AUTHOR
+Erik Quanstrom (quanstro@coraid.com)
