@@ -15,9 +15,9 @@ Please see linux/Documentation/aoe.txt for basic information and
 EtherDrive-2.6-HOWTO.sgml for more.
 
 The aoetools (available separately at sourceforge.net) are required
-for this aoe driver.  You can extract them here and everything will be
-fine, but please use the same version that appears as "TOOLS_D" in the
-Makefile.
+for this aoe driver.  A compatible version is currently bundled with
+this driver, but if you update the version that appears as "TOOLS_D"
+in the Makefile, you can generally use something newer.
 
 
 ## Installation
