@@ -1,0 +1,3 @@
+Kent Overstreet changed biovecs so that they are immutable.
+
+The change appears in 3.13.
