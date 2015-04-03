@@ -30,12 +30,12 @@ MODULE_PARM_DESC(aoe_maxsectors,
 void
 aoe_bio_pagedec(struct bio *bio)
 {
-	struct bio_vec *bv;
 	struct page *page;
-	int i;
+	struct bio_vec bv;
+	struct bvec_iter iter;
 
-	bio_for_each_segment(bv, bio, i) {
-		page = compound_trans_head(bv->bv_page);
+	bio_for_each_segment(bv, bio, iter) {
+		page = compound_trans_head(bv.bv_page);
 		atomic_dec(&page->_count);
 	}
 }
