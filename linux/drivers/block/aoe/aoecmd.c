@@ -943,8 +943,8 @@ bufinit(struct buf *buf, struct request *rq, struct bio *bio)
 	memset(buf, 0, sizeof *buf);
 	buf->rq = rq;
 	buf->bio = bio;
-	buf->resid = bio->bi_size;
-	buf->sector = bio->bi_sector;
+	buf->resid = bio->bi_iter.bi_size;
+	buf->sector = bio->bi_iter.bi_sector;
 	bio_pageinc(bio);
 	buf->bv = bv = &bio->bi_io_vec[bio->bi_idx];
 	buf->bv_resid = bv->bv_len;
@@ -1171,7 +1171,7 @@ aoe_end_request(struct aoedev *d, struct request *rq, int fastfail)
 	do {
 		bio = rq->bio;
 		bok = !fastfail && test_bit(BIO_UPTODATE, &bio->bi_flags);
-	} while (__blk_end_request(rq, bok ? 0 : -EIO, bio->bi_size));
+	} while (__blk_end_request(rq, bok ? 0 : -EIO, bio->bi_iter.bi_size));
 
 	/* cf. http://lkml.org/lkml/2006/10/31/28 */
 	if (!fastfail)
