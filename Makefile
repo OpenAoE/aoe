@@ -2,6 +2,9 @@
 # uses pre-configured 2.6 kernel sources
 # 
 
+.PHONY: copy default tools clean realclean realrealclean \
+  install install_modobj install_nodev kerninst uninstall report
+
 # export all directives to sub makes (aoetools)
 export
 
@@ -54,6 +57,8 @@ DUMMY := $(shell sh mak/cc-id.sh ${MAKE} -C $(KDIR) $(KMAK_FLAGS) SUBDIRS="$(PWD
 DUMMY := $(shell sh mak/kernel-id.sh ${KDIR})
 DUMMY := $(shell sh mak/src-id.sh ${DRIVER_D})
 
+COPY_DIR = $(HOME)/build/aoe
+
 default: tools ${DRIVER_D}/aoe.ko
 
 ${DRIVER_D}/aoe.ko : conf/done mak/src-id.ts
@@ -91,6 +96,14 @@ conf/done : mak/cc-id.ts mak/kernel-id.ts
 	  $(MAKE) -C $(KDIR) $(KMAK_FLAGS) SUBDIRS="$(PWD)/conf" C=0 modules
 	echo > conf/done
 	@sh mak/src-id.sh ${DRIVER_D}
+
+copy:
+	@cpio -p `pwd` < /dev/null 2>&0 || { \
+	  echo Error: cpio is required for copy target 1>&2; \
+	  exit 1; \
+	}
+	mkdir -p $(COPY_DIR)
+	find . -name .git -type d -prune -o -print | cpio -p --verbose $(COPY_DIR)
 
 tools:
 	cd ${TOOLS_D} && make 
