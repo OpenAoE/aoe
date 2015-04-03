@@ -267,9 +267,3 @@ void aoedbg_rtt(struct aoedev *d, struct aoe_hdr *h, struct frame *f, int rtt);
 void aoedbg_devinit(struct aoedev *d);
 void aoedbg_undbg(struct aoedev *d);
 void aoedbg_exit(void);
-
-/* compatibility:
- * old kernels without compound_trans_head usually do not care if we make
- * count of tail pages temporarily positive
- */
-static inline struct page *compound_trans_head(struct page *p) {return p;}
