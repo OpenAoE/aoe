@@ -11,9 +11,9 @@
 #include <asm/unaligned.h>
 #include <linux/uio.h>
 
-struct biovec_iter *iter;
+struct bvec_iter *iter;
 
-struct biovec_iter *test_fn(int n)
+struct bvec_iter *test_fn(int n)
 {
 	return iter + n;
 }
