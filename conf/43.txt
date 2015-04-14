@@ -1,0 +1,9 @@
+commit f4ae40a6a50a98ac23d4b285f739455e926a473e
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Sun Jul 24 04:33:43 2011 -0400
+
+    switch debugfs to umode_t
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+Appears in 3.3.

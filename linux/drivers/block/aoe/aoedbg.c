@@ -26,7 +26,7 @@ static DEFINE_SPINLOCK(buflock);
 static struct dentry *
 cfile(const char *filename,
       struct dentry *parent,
-      int mode,
+      umode_t mode,
       struct rchan_buf *buf,
       int *is_global)
 {
