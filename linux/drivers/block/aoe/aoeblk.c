@@ -35,7 +35,7 @@ aoe_bio_pagedec(struct bio *bio)
 	struct bvec_iter iter;
 
 	bio_for_each_segment(bv, bio, iter) {
-		page = compound_trans_head(bv.bv_page);
+		page = compound_head(bv.bv_page);
 		atomic_dec(&page->_count);
 	}
 }

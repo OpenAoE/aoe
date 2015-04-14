@@ -31,7 +31,7 @@ index 3417a23..a4fea77 100644
  	char flags;
  };
 diff --git a/linux/drivers/block/aoe/aoeblk.c b/linux/drivers/block/aoe/aoeblk.c
-index e2e1aa3..1d6a11d 100644
+index e2e1aa3..7fe7119 100644
 --- a/linux/drivers/block/aoe/aoeblk.c
 +++ b/linux/drivers/block/aoe/aoeblk.c
 @@ -30,12 +30,12 @@ MODULE_PARM_DESC(aoe_maxsectors,
@@ -47,7 +47,7 @@ index e2e1aa3..1d6a11d 100644
 -	bio_for_each_segment(bv, bio, i) {
 -		page = compound_trans_head(bv->bv_page);
 +	bio_for_each_segment(bv, bio, iter) {
-+		page = compound_trans_head(bv.bv_page);
++		page = compound_head(bv.bv_page);
  		atomic_dec(&page->_count);
  	}
  }
