@@ -1,0 +1,14 @@
+commit db2a144bedd58b3dcf19950c2f476c58c9f39d18
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Sun May 5 21:52:57 2013 -0400
+
+    block_device_operations->release() should return void
+    
+    The value passed is 0 in all but "it can never happen" cases (and those
+    only in a couple of drivers) *and* it would've been lost on the way
+    out anyway, even if something tried to pass something meaningful.
+    Just don't bother.
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+First appearing in 3.10.
