@@ -1,4 +1,7 @@
 -*- change-log -*-
+2015-04-13 Ed Cashin <ecashin@acm.org>
+	add support for immutable biovecs with backward compatibility
+
 2015-04-01 Ed Cashin <ecashin@acm.org>
 	update documentation with support.coraid.com offline
 
