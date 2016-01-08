@@ -48,11 +48,11 @@ static spinlock_t emsgs_lock;
 static int nblocked_emsgs_readers;
 static struct class *aoe_class;
 static struct aoe_chardev chardevs[] = {
-	{ MINOR_ERR, "err" },
-	{ MINOR_DISCOVER, "discover" },
-	{ MINOR_INTERFACES, "interfaces" },
-	{ MINOR_REVALIDATE, "revalidate" },
-	{ MINOR_FLUSH, "flush" },
+	{ MINOR_ERR, DEVICE_SUBDIR "/err" },
+	{ MINOR_DISCOVER, DEVICE_SUBDIR "/discover" },
+	{ MINOR_INTERFACES, DEVICE_SUBDIR "/interfaces" },
+	{ MINOR_REVALIDATE, DEVICE_SUBDIR "/revalidate" },
+	{ MINOR_FLUSH, DEVICE_SUBDIR "/flush" },
 };
 static DEFINE_MUTEX(aoechr_mutex);
 

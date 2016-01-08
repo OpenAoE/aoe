@@ -1,7 +1,8 @@
 /* Copyright (c) 2013 Coraid, Inc.  See COPYING for GPL terms. */
-#define VERSION "87pre2"
+#define VERSION "87pre2s"	/* "s" is for subdirectory */
 #define AOE_MAJOR 152
 #define DEVICE_NAME "aoe"
+#define DEVICE_SUBDIR "etherd"
 
 /* AOE_PARTITIONS and DEVSUBDIR are set in the Makefile */
 
