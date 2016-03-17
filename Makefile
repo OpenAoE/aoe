@@ -168,7 +168,7 @@ uninstall:
 	rm -rf $(DEVDIR)
 	/sbin/depmod -a
 
-REPORTF := $(shell awk '$$2=="VERSION"{print $$NF}' ${DRIVER_D}/aoe.h)
+REPORTF := $(shell awk '$$2=="VERSION"{print $$3}' ${DRIVER_D}/aoe.h)
 # remove quotes below
 REPORTF := $(shell echo aoe6-${REPORTF}-report.tar)
 
