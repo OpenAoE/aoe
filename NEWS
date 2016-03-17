@@ -1,4 +1,8 @@
 -*- change-log -*-
+2016-03-16 Ed Cashin <ed.cashin@acm.org>
+	include "etherd/" in character device names for udev-systemd
+	version-87pre3
+
 2016-01-07 Ed Cashin <ed.cashin@acm.org>
 	update driver version string in aoe.h
 	version-87pre2
