@@ -9,7 +9,7 @@ The version number of this driver is unrelated to the version numbers
 of Linux kernels.  Just use the latest aoe driver with your 2.6 or 3.x
 Linux kernel.
 
-[This driver is available on github.](https://github.com/ecashin/aoe)
+[This driver is available on github.](https://github.com/OpenAoE/aoe)
 
 Please see linux/Documentation/aoe.txt for basic information and
 EtherDrive-2.6-HOWTO.sgml for more.
