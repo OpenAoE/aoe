@@ -1550,7 +1550,8 @@ addtgt(struct aoedev *d, char *addr, ulong nframes)
 	memcpy(t->addr, addr, sizeof t->addr);
 	t->ifp = t->ifs;
 	aoecmd_wreset(t);
-	t->maxout = t->nframes / 2;
+	if (t->nframes > 1)
+		t->maxout = t->nframes / 2;
 	INIT_LIST_HEAD(&t->ffree);
 	return *tt = t;
 
