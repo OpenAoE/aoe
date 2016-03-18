@@ -1653,6 +1653,11 @@ aoecmd_cfg_rsp(struct sk_buff *skb)
 	n = be16_to_cpu(ch->bufcnt);
 	if (n > aoe_maxout)	/* keep it reasonable */
 		n = aoe_maxout;
+	else if (n == 0) {
+		pr_warn_ratelimited("aoe: e%ld.%d has zero bufcnt %s\n",
+			aoemajor, h->minor, "and cannot be used");
+		return;
+	}
 
 	d = aoedev_by_aoeaddr(aoemajor, h->minor, 1);
 	if (d == NULL) {
