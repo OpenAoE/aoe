@@ -1,0 +1,90 @@
+commit 4246a0b63bd8f56a1469b12eafeb875b1041a451
+Author: Christoph Hellwig <hch@lst.de>
+Date:   Mon Jul 20 15:29:37 2015 +0200
+
+    block: add a bi_error field to struct bio
+    
+    Currently we have two different ways to signal an I/O error on a BIO:
+    
+     (1) by clearing the BIO_UPTODATE flag
+     (2) by returning a Linux errno value to the bi_end_io callback
+    
+    The first one has the drawback of only communicating a single possible
+    error (-EIO), and the second one has the drawback of not beeing persistent
+    when bios are queued up, and are not passed along from child to parent
+    bio in the ever more popular chaining scenario.  Having both mechanisms
+    available has the additional drawback of utterly confusing driver authors
+    and introducing bugs where various I/O submitters only deal with one of
+    them, and the others have to add boilerplate code to deal with both kinds
+    of error returns.
+    
+    So add a new bi_error field to store an errno value directly in struct
+    bio and remove the existing mechanisms to clean all this up.
+    
+    Signed-off-by: Christoph Hellwig <hch@lst.de>
+    Reviewed-by: Hannes Reinecke <hare@suse.de>
+    Reviewed-by: NeilBrown <neilb@suse.com>
+    Signed-off-by: Jens Axboe <axboe@fb.com>
+
+diff --git a/drivers/block/aoe/aoecmd.c b/drivers/block/aoe/aoecmd.c
+index 422b7d8..ad80c85 100644
+--- a/drivers/block/aoe/aoecmd.c
++++ b/drivers/block/aoe/aoecmd.c
+@@ -1110,7 +1110,7 @@ aoe_end_request(struct aoedev *d, struct request *rq, int fastfail)
+ 		d->ip.rq = NULL;
+ 	do {
+ 		bio = rq->bio;
+-		bok = !fastfail && test_bit(BIO_UPTODATE, &bio->bi_flags);
++		bok = !fastfail && !bio->bi_error;
+ 	} while (__blk_end_request(rq, bok ? 0 : -EIO, bio->bi_iter.bi_size));
+ 
+ 	/* cf. http://lkml.org/lkml/2006/10/31/28 */
+@@ -1172,7 +1172,7 @@ ktiocomplete(struct frame *f)
+ 			ahout->cmdstat, ahin->cmdstat,
+ 			d->aoemajor, d->aoeminor);
+ noskb:		if (buf)
+-			clear_bit(BIO_UPTODATE, &buf->bio->bi_flags);
++			buf->bio->bi_error = -EIO;
+ 		goto out;
+ 	}
+ 
+@@ -1185,7 +1185,7 @@ noskb:		if (buf)
+ 				"aoe: runt data size in read from",
+ 				(long) d->aoemajor, d->aoeminor,
+ 			       skb->len, n);
+-			clear_bit(BIO_UPTODATE, &buf->bio->bi_flags);
++			buf->bio->bi_error = -EIO;
+ 			break;
+ 		}
+ 		if (n > f->iter.bi_size) {
+@@ -1193,7 +1193,7 @@ noskb:		if (buf)
+ 				"aoe: too-large data size in read from",
+ 				(long) d->aoemajor, d->aoeminor,
+ 				n, f->iter.bi_size);
+-			clear_bit(BIO_UPTODATE, &buf->bio->bi_flags);
++			buf->bio->bi_error = -EIO;
+ 			break;
+ 		}
+ 		bvcpy(skb, f->buf->bio, f->iter, n);
+@@ -1695,7 +1695,7 @@ aoe_failbuf(struct aoedev *d, struct buf *buf)
+ 	if (buf == NULL)
+ 		return;
+ 	buf->iter.bi_size = 0;
+-	clear_bit(BIO_UPTODATE, &buf->bio->bi_flags);
++	buf->bio->bi_error = -EIO;
+ 	if (buf->nframesout == 0)
+ 		aoe_end_buf(d, buf);
+ }
+diff --git a/drivers/block/aoe/aoedev.c b/drivers/block/aoe/aoedev.c
+index e774c50..ffd1947 100644
+--- a/drivers/block/aoe/aoedev.c
++++ b/drivers/block/aoe/aoedev.c
+@@ -170,7 +170,7 @@ aoe_failip(struct aoedev *d)
+ 	if (rq == NULL)
+ 		return;
+ 	while ((bio = d->ip.nxbio)) {
+-		clear_bit(BIO_UPTODATE, &bio->bi_flags);
++		bio->bi_error = -EIO;
+ 		d->ip.nxbio = bio->bi_next;
+ 		n = (unsigned long) rq->special;
+ 		rq->special = (void *) --n;
