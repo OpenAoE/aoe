@@ -1,5 +1,5 @@
 /* Copyright (c) 2013 Coraid, Inc.  See COPYING for GPL terms. */
-#define VERSION "87"
+#define VERSION "87moth"
 #define AOE_MAJOR 152
 #define DEVICE_NAME "aoe"
 #define DEVICE_SUBDIR "etherd"

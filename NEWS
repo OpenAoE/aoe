@@ -1,4 +1,8 @@
 -*- change-log -*-
+2017-03-15 Ed Cashin <ed.cashin@acm.org>
+	mothballing standalone driver
+	version-v87moth
+
 2017-02-22 Ed Cashin <ed.cashin@acm.org>
 	merge v87pre3-bi_error for 4.4.x support
 	version-87
