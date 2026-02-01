@@ -1844,7 +1844,7 @@ aoecmd_exit(void)
 
 	aoe_flush_iocq();
 
-	/* Free up the iocq and thread speicific configuration
+	/* Free up the iocq and thread specific configuration
 	* allocated during startup.
 	*/
 	kfree(iocq);

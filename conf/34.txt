@@ -32,7 +32,7 @@ Date:   Sat Oct 18 20:28:50 2008 -0700
     can test.  Compile (make allyesconfig / make allmodconfig / custom config)
     and boot tested.
     
-    akpm: the idea is that we put the declaration of sttribute.owner inside
+    akpm: the idea is that we put the declaration of attribute.owner inside
     `#ifndef CONFIG_X86'.  But that proved to be too ambitious for now because
     new usages kept on turning up in subsystem trees.
 ...

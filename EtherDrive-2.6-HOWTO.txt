@@ -9,7 +9,7 @@
   applicable to other systems that use AoE devices. Below we begin by
   explaining the key components of the network communication method, ATA
   over Ethernet (AoE). Next, we discuss the way a Linux host uses AoE
-  devices, providing serveral examples.  A list of frequently asked
+  devices, providing several examples.  A list of frequently asked
   questions follows, and the document ends with supplementary informa-
   tion.
   ______________________________________________________________________
@@ -589,7 +589,7 @@
   using the filesystem. All the hosts working together are called a
   cluster, and each member of the cluster is called a cluster node.
 
-  To achieve acceptible performance, each cluster node remembers what
+  To achieve acceptable performance, each cluster node remembers what
   was on the block device the last time it looked. This is caching,
   where data from copies in RAM are used temporarily instead of data
   directly from the block device.
@@ -629,7 +629,7 @@
   GFS and its related software are undergoing continuous heavy
   development and are maturing slowly but steadily.
 
-  As might be expected, the devleopers working for RedHat target RedHat
+  As might be expected, the developers working for RedHat target RedHat
   Enterprise Linux as the ultimate platform for GFS and its related
   software. They also use Fedora Core as a platform for testing and
   innovation.
@@ -836,7 +836,7 @@
   you want to use AoE.
 
   To discover an AoE device, the aoe driver must receive a Query Config
-  reponse packet that indicates the device is available. A Coraid SR
+  response packet that indicates the device is available. A Coraid SR
   broadcasts this response unsolicited when you run the online SR
   command, but it is usually sent in response to an AoE initiator
   broadcasting a Query Config command to discover devices on the
@@ -1126,7 +1126,7 @@
 
   When a new block device is detected by the kernel, the kernel tries to
   read the part of the block device where a partition table is
-  conventially stored.
+  conventionally stored.
 
   The kernel checks to see whether the data there looks like any kind of
   partition table that it knows about. It can't tell the difference
@@ -1270,7 +1270,7 @@
 
   A: The xfstools use a huge amount of virtual memory when operating on
   large filesystems. The CLN HOWTO has some helpful information about
-  using temporary swap space when necessary for accomodating the
+  using temporary swap space when necessary for accommodating the
   xfstools' virtual memory requirements.
 
   CLN HOWTO: Repairing a Filesystem </support/cln/CLN-
@@ -1466,7 +1466,7 @@
   stripe data over several RAID 1 devices. Each RAID 1 is a mirrored
   pair of disks. For a given (even) number of disks, a RAID 10 has less
   capacity and throughput than a RAID 5. Nevertheless, storage experts
-  often prefer RAID 10 for its superior resiliancy to failure, its low
+  often prefer RAID 10 for its superior resiliency to failure, its low
   re-initialization time, and its low computational overhead.
 
   The first example shows how to create a RAID 10 and a hot spare from
@@ -1535,7 +1535,7 @@
 
   # This is normally a program that handles events instead
   # of just /bin/echo.  If you run the mdadm monitor in the
-  # forground, though, using echo allows you to see what events
+  # foreground, though, using echo allows you to see what events
   # are occurring.
   #
   PROGRAM /bin/echo

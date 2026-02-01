@@ -17,7 +17,7 @@ of the device nodes.)
 
 If you use an aoe driver from the CORAID website
 (http://support.coraid.com/support/linux/) then just use the aoetools that
-come bundled with that deiver.  If you don't have udev, make sure you
+come bundled with that driver.  If you don't have udev, make sure you
 always load the aoe module with the aoe_dyndevs=0 option for any
 driver version above 49.
 
